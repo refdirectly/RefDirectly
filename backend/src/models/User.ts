@@ -1,0 +1,69 @@
+import mongoose, { Document, Schema } from 'mongoose';
+
+export interface IUser extends Document {
+  role: 'seeker' | 'referrer' | 'admin';
+  name?: string;
+  displayName?: string;
+  email: string;
+  passwordHash: string;
+  linkedinUrl?: string;
+  companies: Array<{
+    name: string;
+    verified: boolean;
+    roles: string[];
+  }>;
+  pricePerReferral?: number;
+  rating?: number;
+  verified: boolean;
+  createdAt: Date;
+  lastSeenAt: Date;
+  avatarUrl?: string;
+  bio?: string;
+}
+
+const UserSchema = new Schema<IUser>({
+  role: {
+    type: String,
+    enum: ['seeker', 'referrer', 'admin'],
+    required: true
+  },
+  name: String,
+  displayName: String,
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  passwordHash: {
+    type: String,
+    required: true
+  },
+  linkedinUrl: String,
+  companies: [{
+    name: String,
+    verified: { type: Boolean, default: false },
+    roles: [String]
+  }],
+  pricePerReferral: Number,
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  lastSeenAt: {
+    type: Date,
+    default: Date.now
+  },
+  avatarUrl: String,
+  bio: String
+});
+
+export default mongoose.model<IUser>('User', UserSchema);

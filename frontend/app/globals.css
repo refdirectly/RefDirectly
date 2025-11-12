@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg transition-transform duration-200 ease-in-out transform hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue;
+  }
+  .btn-primary {
+    @apply bg-gradient-primary text-white;
+  }
+  .btn-secondary {
+    @apply border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:text-gray-900;
+  }
+}
+
+/* Simple scrollbar hiding utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
