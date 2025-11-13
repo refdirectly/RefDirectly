@@ -19,7 +19,7 @@ const WalletDemoPage: React.FC = () => {
 
       // Step 1: Add funds to seeker wallet
       setMessage('Step 1: Adding ₹99 to seeker wallet...');
-      await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/add-funds', {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/add-funds', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ userId: seekerId, userType: 'seeker', amount: 99 })
@@ -28,7 +28,7 @@ const WalletDemoPage: React.FC = () => {
 
       // Step 2: Simulate referral request (hold payment)
       setMessage('Step 2: Creating referral request and holding payment...');
-      const simResponse = await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/simulate-complete', {
+      const simResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/simulate-complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ seekerId, referrerId })

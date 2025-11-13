@@ -44,14 +44,15 @@ export default function ChatPage() {
     setUser(JSON.parse(userData));
 
     // Initialize socket
-    const newSocket = io(import.meta.env.VITE_API_URL || \`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}', {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const newSocket = io(API_URL, {
       withCredentials: true,
       auth: { token }
     });
     setSocket(newSocket);
 
     // Fetch user's chats
-    fetch(`${import.meta.env.VITE_API_URL || \`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}'}/api/chat/chats`, {
+    fetch(`${API_URL}/api/chat/chats`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

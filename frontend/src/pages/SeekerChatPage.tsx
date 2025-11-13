@@ -20,14 +20,15 @@ export default function SeekerChatPage() {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_API_URL || \`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}'}/api/referrals/${roomId}`, {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    fetch(`${API_URL}/api/referrals/${roomId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => setChatInfo(data))
       .catch(console.error);
 
-    const newSocket = io(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}', {
+    const newSocket = io(API_URL, {
       withCredentials: true,
       auth: { token }
     });

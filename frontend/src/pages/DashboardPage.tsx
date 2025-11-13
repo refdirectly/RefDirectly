@@ -37,7 +37,7 @@ const DashboardPage: React.FC = () => {
     
     // Initialize socket
     import('socket.io-client').then(({ io }) => {
-      const newSocket = io(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}', {
+      const newSocket = io(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}', {
         withCredentials: true,
         auth: { token }
       });
@@ -57,7 +57,7 @@ const DashboardPage: React.FC = () => {
       setDashboardData(data);
       
       // Fetch organization jobs
-      const jobsRes = await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/job-postings');
+      const jobsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/job-postings');
       const jobsData = await jobsRes.json();
       if (jobsData.success) {
         setOrgJobs(jobsData.jobPostings.slice(0, 3));
@@ -66,10 +66,10 @@ const DashboardPage: React.FC = () => {
       // Fetch referral requests and chats
       if (token) {
         const [chatsRes, requestsRes] = await Promise.all([
-          fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/chats', {
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/chats', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/referrals/seeker', {
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/referrals/seeker', {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);

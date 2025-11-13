@@ -55,7 +55,7 @@ const PostJobPage: React.FC = () => {
 
       console.log('Payload:', payload);
 
-      const response = await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/job-postings', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/job-postings', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 
