@@ -16,7 +16,7 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -197,7 +197,7 @@ const Login: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <a
-                    href="http://localhost:3001/api/auth/google"
+                    href="`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/google`"
                     className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-brand-purple hover:bg-gray-50 transition-all font-semibold text-gray-700 hover:shadow-md"
                   >
                     <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -209,7 +209,7 @@ const Login: React.FC = () => {
                     Google
                   </a>
                   <a
-                    href="http://localhost:3001/api/auth/linkedin"
+                    href="`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/linkedin`"
                     className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-brand-purple hover:bg-gray-50 transition-all font-semibold text-gray-700 hover:shadow-md"
                   >
                     <svg className="h-5 w-5" fill="#0077B5" viewBox="0 0 24 24">
