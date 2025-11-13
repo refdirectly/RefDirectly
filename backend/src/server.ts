@@ -88,7 +88,9 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
-
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong'); // just a simple response
+});
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
