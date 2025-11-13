@@ -38,11 +38,12 @@ const JobsPage: React.FC = () => {
   const fetchReferralData = () => {
     const token = localStorage.getItem('token');
     if (token) {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       Promise.all([
-        fetch('http://localhost:3001/api/chat/chats', {
+        fetch(`${API_URL}/api/chat/chats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(res => res.json()),
-        fetch('http://localhost:3001/api/referrals/seeker', {
+        fetch(`${API_URL}/api/referrals/seeker`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(res => res.json())
       ])
@@ -83,8 +84,9 @@ const JobsPage: React.FC = () => {
       setLoading(true);
       setError('');
       try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
         // Fetch organization postings
-        const orgResponse = await fetch('http://localhost:3001/api/job-postings');
+        const orgResponse = await fetch(`${API_URL}/api/job-postings`);
         const orgResult = await orgResponse.json();
         const orgJobs = (orgResult.jobPostings || []).map((job: any) => ({
           _id: job._id,
@@ -103,7 +105,7 @@ const JobsPage: React.FC = () => {
         }));
 
         // Fetch API jobs
-        const response = await fetch(`http://localhost:3001/api/jobs/live?keywords=${encodeURIComponent(searchTerm || 'software engineer')}&location=${encodeURIComponent(locationFilter || 'United States')}`);
+        const response = await fetch(`${API_URL}/api/jobs/live?keywords=${encodeURIComponent(searchTerm || 'software engineer')}&location=${encodeURIComponent(locationFilter || 'United States')}`);
         const result = await response.json();
         
         const jobsData = result.jobs || [];
