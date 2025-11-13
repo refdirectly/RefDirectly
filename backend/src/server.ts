@@ -29,9 +29,16 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://refdirectlywebsite.onrender.com'
+];
+
 const io = new Server(server, {
   cors: {
-    origin: ['https://refdirectlywebsite.onrender.com'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
@@ -39,8 +46,11 @@ const io = new Server(server, {
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['https://refdirectlywebsite.onrender.com', process.env.FRONTEND_URL || 'http://localhost:3000'],
-  credentials: true
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 // Rate limiting
