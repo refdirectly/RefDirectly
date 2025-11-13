@@ -31,15 +31,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    origin: ['https://refdirectlywebsite.onrender.com'],
+    methods: ['GET', 'POST']
   }
 });
 
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['https://refdirectlywebsite.onrender.com', process.env.FRONTEND_URL || 'http://localhost:3000'],
   credentials: true
 }));
 
