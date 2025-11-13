@@ -209,56 +209,6 @@ const AIApplyPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="bg-white rounded-2xl p-12 shadow-xl"
-              >
-                <h2 className="font-display text-3xl font-bold text-gray-900 mb-8 text-center">Upload Your Resume</h2>
-                
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-brand-purple transition-colors">
-                  <input
-                    type="file"
-                    id="resume-upload"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <label htmlFor="resume-upload" className="cursor-pointer">
-                    <Upload className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    {resume ? (
-                      <div>
-                        <p className="text-lg font-semibold text-gray-900 mb-2">{resume.name}</p>
-                        <p className="text-sm text-gray-600">Click to change file</p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-lg font-semibold text-gray-900 mb-2">Drop your resume here or click to browse</p>
-                        <p className="text-sm text-gray-600">Supports PDF, DOC, DOCX</p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-
-                {resume && (
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="w-full mt-6 bg-gradient-primary text-white py-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105"
-                  >
-                    Continue with AI Apply
-                  </motion.button>
-                )}
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto mb-16">

@@ -87,7 +87,7 @@ const SignUp: React.FC = () => {
         >
           <div className="text-center mb-12">
             <h2 className="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Join ReferUs
+              Join RefDirectly
             </h2>
             <p className="text-xl text-gray-600">
               Choose how you want to get started

@@ -42,7 +42,7 @@ const AboutPage: React.FC = () => {
               className="text-center max-w-3xl mx-auto"
             >
               <h1 className="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                About <span className="bg-gradient-primary bg-clip-text text-transparent">ReferUs</span>
+                About <span className="bg-gradient-primary bg-clip-text text-transparent">RefDirectly</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-600">
                 Transforming the way people find jobs through trusted referrals and AI-powered connections.
@@ -63,10 +63,10 @@ const AboutPage: React.FC = () => {
               >
                 <h2 className="font-display text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
                 <p className="text-gray-600 mb-4">
-                  ReferUs was born from a simple observation: getting a job referral shouldn't be about who you know, but about your skills and potential. We recognized that talented professionals often struggle to break into top companies simply because they lack connections.
+                  RefDirectly was born from a simple observation: getting a job referral shouldn't be about who you know, but about your skills and potential. We recognized that talented professionals often struggle to break into top companies simply because they lack connections.
                 </p>
                 <p className="text-gray-600 mb-4">
-                  At the same time, employees at these companies want to help and earn referral bonuses, but lack a trusted platform to connect with qualified candidates. We built ReferUs to bridge this gap.
+                  At the same time, employees at these companies want to help and earn referral bonuses, but lack a trusted platform to connect with qualified candidates. We built RefDirectly to bridge this gap.
                 </p>
                 <p className="text-gray-600">
                   Our platform combines AI-powered matching with secure escrow payments to create a transparent, trustworthy marketplace for job referrals. Every referrer is verified, every payment is protected, and every connection is meaningful.

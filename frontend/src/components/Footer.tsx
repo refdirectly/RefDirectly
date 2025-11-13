@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-16 mb-20">
           <div className="lg:col-span-1">
             <div className="mb-6">
-              <img src="/logo.png" alt="ReferUs" className="h-20 w-28 mb-4" />
+              <img src="/logo.png" alt="RefDirectly" className="h-20 w-28 mb-4" />
             </div>
             <p className="text-gray-300 mb-8 max-w-sm leading-relaxed text-base">
               The modern way to get referred and hired. Connect with verified professionals and accelerate your career journey.

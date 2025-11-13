@@ -8,9 +8,11 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import passport from './config/passport';
 import { createReferralHandler } from './sockets/referral';
+import { createNotificationHandler } from './sockets/notification';
 import { startScheduler } from './utils/scheduler';
 import { startEscrowCron } from './utils/escrowCron';
 import authRoutes from './routes/auth';
+import notificationRoutes from './routes/notifications';
 import referralRoutes from './routes/referrals';
 import paymentRoutes from './routes/payments';
 import matchingRoutes from './routes/matching';
@@ -70,6 +72,7 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/job-postings', jobPostingRoutes);
 app.use('/api/escrow', escrowRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -80,11 +83,14 @@ app.get('/health', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
   createReferralHandler(io, socket);
+  createNotificationHandler(io, socket);
   
   socket.on('disconnect', () => {
     console.log('Socket disconnected:', socket.id);
   });
 });
+
+export { io };
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

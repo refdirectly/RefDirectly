@@ -41,14 +41,12 @@ export const fetchJobsJsearch = async (query: string, location: string = 'United
       method: 'GET',
       url: 'https://jsearch.p.rapidapi.com/search',
       params: {
-        query: `${query} jobs in ${location}`,
+        query: `${query} in ${location}`,
         page: '1',
-        num_pages: '1',
-        country: 'us',
-        date_posted: 'all'
+        num_pages: '1'
       },
       headers: {
-        'x-rapidapi-key': '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
+        'x-rapidapi-key': process.env.RAPIDAPI_KEY || '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
         'x-rapidapi-host': 'jsearch.p.rapidapi.com'
       }
     };
@@ -56,13 +54,23 @@ export const fetchJobsJsearch = async (query: string, location: string = 'United
     const response = await axios.request(options);
     
     if (typeof response.data === 'string') {
-      throw new Error('API returned non-JSON response');
+      console.error('API returned string:', response.data);
+      throw new Error('API returned invalid format');
+    }
+    
+    if (!response.data || !response.data.data) {
+      console.error('API response:', response.data);
+      return [];
     }
     
     return response.data.data || [];
   } catch (error: any) {
-    console.error('Jsearch API error:', error.response?.data || error.message);
-    throw new Error('API unavailable');
+    console.error('Jsearch API error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    return [];
   }
 };
 

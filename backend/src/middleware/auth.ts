@@ -21,3 +21,5 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     res.status(401).json({ success: false, message: 'Invalid token' });
   }
 };
+
+export const authenticateJWT = authMiddleware;

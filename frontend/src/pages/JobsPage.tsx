@@ -106,10 +106,6 @@ const JobsPage: React.FC = () => {
         const response = await fetch(`http://localhost:3001/api/jobs/live?keywords=${encodeURIComponent(searchTerm || 'software engineer')}&location=${encodeURIComponent(locationFilter || 'United States')}`);
         const result = await response.json();
         
-        if (!result.success) {
-          throw new Error(result.message);
-        }
-        
         const jobsData = result.jobs || [];
         const formattedJobs = jobsData.map((job: any) => ({
           _id: job.job_id,
@@ -163,7 +159,7 @@ const JobsPage: React.FC = () => {
                 10,000+ Open Roles
               </h1>
               <p className="text-xl opacity-90 max-w-2xl mx-auto">
-                We've helped countless job seekers land their dream jobs — now it's your turn. Browse thousands of open roles on ReferUs.
+                We've helped countless job seekers land their dream jobs — now it's your turn. Browse thousands of open roles on RefDirectly.
               </p>
             </motion.div>
 

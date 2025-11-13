@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-2">
-    <img src="/logo.png" alt="ReferUs logo" className="h-28 w-36" />
+    <img src="/logo.png" alt="RefDirectly logo" className="h-28 w-36" />
   </Link>
 );
 

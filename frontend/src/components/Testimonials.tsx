@@ -35,7 +35,7 @@ const Testimonials: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">Trusted by Job Seekers and Referrers</h2>
-          <p className="text-lg text-gray-600">Hear what our users have to say about their success with ReferUs.</p>
+          <p className="text-lg text-gray-600">Hear what our users have to say about their success with RefDirectly.</p>
         </div>
         <div className="mt-16">
           <div className="flex overflow-x-auto space-x-8 pb-8 -mx-4 px-4 scrollbar-hide">

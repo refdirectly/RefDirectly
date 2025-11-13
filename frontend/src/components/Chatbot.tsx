@@ -83,7 +83,7 @@ const Chatbot: React.FC = () => {
                   <Bot className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">ReferUs Assistant</h3>
+                  <h3 className="font-semibold">RefDirectly Assistant</h3>
                   <p className="text-xs opacity-90">Online</p>
                 </div>
               </div>

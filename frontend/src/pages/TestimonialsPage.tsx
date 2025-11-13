@@ -51,7 +51,7 @@ const TestimonialsPage: React.FC = () => {
                 Success Stories
               </h1>
               <p className="text-lg md:text-xl text-gray-600">
-                Real stories from job seekers and referrers who found success through ReferUs.
+                Real stories from job seekers and referrers who found success through RefDirectly.
               </p>
             </motion.div>
           </div>

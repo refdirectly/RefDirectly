@@ -8,7 +8,7 @@ const stats = [
     icon: Briefcase,
     number: '54,571',
     label: 'Open Roles',
-    description: "We've helped countless job seekers land their dream jobs — now it's your turn. Browse thousands of open roles on ReferUs.",
+    description: "We've helped countless job seekers land their dream jobs — now it's your turn. Browse thousands of open roles on RefDirectly.",
   },
   {
     icon: Users,

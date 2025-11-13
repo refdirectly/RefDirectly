@@ -93,7 +93,7 @@ const ReferrerSignupPage: React.FC = () => {
               className="text-white hidden lg:block"
             >
               <Link to="/" className="inline-block mb-8">
-                <img src="/logo.png" alt="ReferUs" className="h-20 w-auto brightness-0 invert" />
+                <img src="/logo.png" alt="RefDirectly" className="h-20 w-auto brightness-0 invert" />
               </Link>
               <h1 className="font-display text-5xl font-bold mb-6">
                 Turn Your Network Into Income

@@ -6,9 +6,10 @@ export const fetchLiveJobs = async (req: Request, res: Response) => {
   try {
     const { keywords = 'software engineer', location = 'United States' } = req.query;
     const jobs = await fetchJobsJsearch(keywords as string, location as string);
-    res.json(jobs);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch live jobs' });
+    res.json({ success: true, jobs: jobs || [], count: jobs?.length || 0 });
+  } catch (error: any) {
+    console.error('Live jobs error:', error);
+    res.json({ success: true, jobs: [], count: 0, message: 'No jobs available at the moment' });
   }
 };
 
