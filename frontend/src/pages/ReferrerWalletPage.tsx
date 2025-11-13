@@ -35,7 +35,7 @@ const ReferrerWalletPage: React.FC = () => {
   const fetchWallet = async () => {
     try {
       const token = localStorage.getItem('token');
-      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/referrals/referrer', {
+      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/referrals/referrer`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const referrals = await referralsRes.json();
@@ -62,7 +62,7 @@ const ReferrerWalletPage: React.FC = () => {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/referrals/referrer', {
+      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/referrals/referrer`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const referrals = await referralsRes.json();
@@ -88,7 +88,7 @@ const ReferrerWalletPage: React.FC = () => {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/withdraw', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/wallet/withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ userId, amount: parseFloat(withdrawAmount) })

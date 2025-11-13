@@ -18,7 +18,7 @@ const ReferrerEarningsPage: React.FC = () => {
     const token = localStorage.getItem('token');
     
     try {
-      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/referrals/referrer', {
+      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/referrals/referrer`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const referrals = await referralsRes.json();

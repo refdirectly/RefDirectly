@@ -23,7 +23,7 @@ const ReferrerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/referrals/referrer', {
+      const referralsRes = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/referrals/referrer`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
