@@ -3,12 +3,12 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  
   preview: {
+    host: true, // allow external access
+    port: Number(process.env.PORT) || 4173, // Render sets PORT dynamically
     allowedHosts: ['refdirectlywebsite.onrender.com'],
   },
 });
