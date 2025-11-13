@@ -36,7 +36,8 @@ const AIJobSearchPage: React.FC = () => {
   const fetchInitialJobs = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/jobs/live?keywords=software engineer&location=United States&num_pages=2');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/jobs/live?keywords=software engineer&location=United States&num_pages=2`);
       const result = await response.json();
       if (result.success && result.jobs) {
         setJobs(result.jobs);
@@ -53,7 +54,8 @@ const AIJobSearchPage: React.FC = () => {
     
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/jobs/live?keywords=${encodeURIComponent(aiQuery)}&location=United States&num_pages=2`);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/jobs/live?keywords=${encodeURIComponent(aiQuery)}&location=United States&num_pages=2`);
       const result = await response.json();
       if (result.success && result.jobs) {
         setJobs(result.jobs);
@@ -68,9 +70,10 @@ const AIJobSearchPage: React.FC = () => {
   const handleSuggestionClick = (suggestion: string) => {
     setAiQuery(suggestion);
     setTimeout(() => {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const keywords = suggestion.toLowerCase();
       setLoading(true);
-      fetch(`http://localhost:3001/api/jobs/live?keywords=${encodeURIComponent(keywords)}&location=United States&num_pages=2`)
+      fetch(`${API_URL}/api/jobs/live?keywords=${encodeURIComponent(keywords)}&location=United States&num_pages=2`)
         .then(res => res.json())
         .then(result => {
           if (result.success && result.jobs) {

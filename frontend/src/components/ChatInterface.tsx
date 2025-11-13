@@ -45,7 +45,8 @@ export default function ChatInterface({ roomId, userRole, socket, onClose }: Cha
     socket.on('disconnect', () => setIsConnected(false));
 
     const token = localStorage.getItem('token');
-    fetch(`http://localhost:3001/api/chat/${roomId}`, {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    fetch(`${API_URL}/api/chat/${roomId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())

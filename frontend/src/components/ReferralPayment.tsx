@@ -23,10 +23,11 @@ const ReferralPayment: React.FC<ReferralPaymentProps> = ({ jobId, referrerId, on
 
   const fetchWallet = async () => {
     try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       
-      const response = await fetch('http://localhost:3001/api/wallet/get', {
+      const response = await fetch(`${API_URL}/api/wallet/get`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ userId, userType: 'seeker' })
@@ -44,11 +45,12 @@ const ReferralPayment: React.FC<ReferralPaymentProps> = ({ jobId, referrerId, on
     setError('');
 
     try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
 
       // Add dummy funds to wallet
-      const addFundsResponse = await fetch('http://localhost:3001/api/wallet/add-funds', {
+      const addFundsResponse = await fetch(`${API_URL}/api/wallet/add-funds`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
@@ -84,11 +86,12 @@ const ReferralPayment: React.FC<ReferralPaymentProps> = ({ jobId, referrerId, on
     setError('');
 
     try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
 
       // Create referral request
-      const referralResponse = await fetch('http://localhost:3001/api/referrals/create', {
+      const referralResponse = await fetch(`${API_URL}/api/referrals/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
@@ -106,7 +109,7 @@ const ReferralPayment: React.FC<ReferralPaymentProps> = ({ jobId, referrerId, on
       }
 
       // Hold payment in escrow
-      const paymentResponse = await fetch('http://localhost:3001/api/wallet/hold', {
+      const paymentResponse = await fetch(`${API_URL}/api/wallet/hold`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({

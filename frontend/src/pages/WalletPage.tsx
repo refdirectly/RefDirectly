@@ -38,7 +38,7 @@ const WalletPage: React.FC = () => {
       const userId = localStorage.getItem('userId');
       const userType = localStorage.getItem('userType') || 'seeker';
       
-      const response = await fetch('http://localhost:3001/api/wallet/get', {
+      const response = await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/get', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ userId, userType })
@@ -59,7 +59,7 @@ const WalletPage: React.FC = () => {
       const userId = localStorage.getItem('userId');
       const userType = localStorage.getItem('userType') || 'seeker';
       
-      const response = await fetch('http://localhost:3001/api/wallet/transactions', {
+      const response = await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ userId, userType })
@@ -78,7 +78,7 @@ const WalletPage: React.FC = () => {
       const userId = localStorage.getItem('userId');
       const userType = localStorage.getItem('userType') || 'seeker';
       
-      const response = await fetch('http://localhost:3001/api/wallet/add-funds', {
+      const response = await fetch(\`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/add-funds', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ userId, userType, amount: parseFloat(amount) })

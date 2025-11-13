@@ -18,8 +18,9 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const userId = localStorage.getItem('userId');
 
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/referrals', {
+      const response = await fetch(`${API_URL}/api/referrals`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

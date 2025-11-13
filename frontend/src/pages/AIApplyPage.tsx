@@ -49,7 +49,8 @@ const AIApplyPage: React.FC = () => {
 
   const fetchAppliedJobs = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/jobs/live?keywords=software engineer&location=United States');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/jobs/live?keywords=software engineer&location=United States`);
       const result = await response.json();
       
       if (result.success && result.jobs) {
