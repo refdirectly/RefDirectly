@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 const pdf = require('pdf-parse');
 
+// PDF analysis with Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export const generateSummary = async (req: Request, res: Response) => {
