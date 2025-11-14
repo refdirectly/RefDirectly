@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import pdf from 'pdf-parse';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -82,7 +83,20 @@ export const generateSkills = async (req: Request, res: Response) => {
 
 export const analyzeATS = async (req: Request, res: Response) => {
   try {
-    const { resumeText } = req.body;
+    let resumeText = '';
+
+    // Handle PDF file upload
+    if (req.file) {
+      const dataBuffer = req.file.buffer;
+      const pdfData = await pdf(dataBuffer);
+      resumeText = pdfData.text;
+    } else if (req.body.resumeText) {
+      resumeText = req.body.resumeText;
+    }
+
+    if (!resumeText) {
+      return res.status(400).json({ error: 'Resume file or text is required' });
+    }
 
     // Fallback if no API key
     if (!process.env.GEMINI_API_KEY) {

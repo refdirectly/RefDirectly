@@ -5,35 +5,33 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const ATSChecker: React.FC = () => {
-  const [resumeText, setResumeText] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setResumeText(event.target?.result as string);
-        setResults(null);
-      };
-      reader.readAsText(file);
+    const uploadedFile = e.target.files?.[0];
+    if (uploadedFile) {
+      setFile(uploadedFile);
+      setResults(null);
     }
   };
 
   const analyzeResume = async () => {
-    if (!resumeText.trim()) {
-      alert('Please paste your resume text or upload a file');
+    if (!file) {
+      alert('Please upload a PDF resume');
       return;
     }
     
     setAnalyzing(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const formData = new FormData();
+      formData.append('resume', file);
+      
       const response = await fetch(`${API_URL}/api/ai-resume/analyze-ats`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeText })
+        body: formData
       });
       const data = await response.json();
       if (data.success) {
@@ -121,43 +119,34 @@ const ATSChecker: React.FC = () => {
                 transition={{ delay: 0.4 }}
                 className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 mb-8 border-2 border-white"
               >
-                <div className="mb-8">
-                  <label className="block text-lg font-bold text-gray-900 mb-4">Paste Your Resume Text</label>
-                  <textarea
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste your resume content here..."
-                    rows={12}
-                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 font-mono text-sm"
-                  />
-                </div>
-
                 <div className="text-center">
-                  <div className="mb-6">
-                    <span className="text-gray-500 font-semibold">OR</span>
-                  </div>
                   <input
                     type="file"
-                    accept=".txt"
+                    accept=".pdf"
                     onChange={handleFileUpload}
                     className="hidden"
                     id="resume-upload"
                   />
                   <label
                     htmlFor="resume-upload"
-                    className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-8 py-4 rounded-2xl font-bold cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                    className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-12 py-6 rounded-2xl font-bold text-lg cursor-pointer hover:shadow-2xl transition-all hover:scale-105"
                   >
-                    <Upload className="h-5 w-5" />
-                    Upload Text File
+                    <Upload className="h-6 w-6" />
+                    Upload PDF Resume
                   </label>
+                  {file && (
+                    <div className="mt-6 text-gray-700 font-semibold">
+                      Selected: {file.name}
+                    </div>
+                  )}
                 </div>
 
-                {resumeText && (
+                {file && (
                   <div className="mt-8 text-center">
                     <button
                       onClick={analyzeResume}
                       disabled={analyzing}
-                      className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50"
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50"
                     >
                       <Sparkles className="h-6 w-6" />
                       {analyzing ? 'Analyzing Resume...' : 'Analyze with AI'}
@@ -296,7 +285,7 @@ const ATSChecker: React.FC = () => {
                   <div className="flex flex-col sm:flex-row gap-6 justify-center">
                     <button
                       onClick={() => {
-                        setResumeText('');
+                        setFile(null);
                         setResults(null);
                       }}
                       className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105"
