@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-const pdf = require('pdf-parse');
 
 // PDF analysis with Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -89,8 +88,10 @@ export const analyzeATS = async (req: Request, res: Response) => {
     // Handle PDF file upload
     if (req.file) {
       console.log('Processing PDF file:', req.file.originalname);
-      const pdfData = await pdf(req.file.buffer);
-      resumeText = pdfData.text;
+      const { PDFParse } = await import('pdf-parse');
+      const parser = new PDFParse({ data: new Uint8Array(req.file.buffer) });
+      const result = await parser.getText();
+      resumeText = result.text;
       console.log('Extracted text length:', resumeText.length);
     } else if (req.body.resumeText) {
       resumeText = req.body.resumeText;
