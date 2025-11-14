@@ -36,6 +36,8 @@ const ATSChecker: React.FC = () => {
       const data = await response.json();
       if (data.success) {
         setResults(data);
+      } else {
+        alert(data.error || 'Failed to analyze resume');
       }
     } catch (error) {
       console.error('Analysis error:', error);

@@ -87,14 +87,16 @@ export const analyzeATS = async (req: Request, res: Response) => {
 
     // Handle PDF file upload
     if (req.file) {
+      console.log('Processing PDF file:', req.file.originalname);
       const pdfData = await pdf(req.file.buffer);
       resumeText = pdfData.text;
+      console.log('Extracted text length:', resumeText.length);
     } else if (req.body.resumeText) {
       resumeText = req.body.resumeText;
     }
 
-    if (!resumeText) {
-      return res.status(400).json({ error: 'Resume file or text is required' });
+    if (!resumeText || resumeText.trim().length === 0) {
+      return res.status(400).json({ success: false, error: 'Resume file or text is required' });
     }
 
     // Fallback if no API key
