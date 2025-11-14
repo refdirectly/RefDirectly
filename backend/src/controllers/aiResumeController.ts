@@ -108,41 +108,40 @@ export const analyzeATS = async (req: Request, res: Response) => {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     
-    let prompt = 'You are an expert ATS analyzer. Analyze this resume comprehensively.\n\nResume:\n' + resumeText;
+    const resumePreview = resumeText.substring(0, 3000);
+    let prompt = `Analyze this resume for ATS compatibility. Return JSON with: score, strengths, improvements, keywords (found, missing), formatting (score, issues, recommendations), sections (present, missing, quality), readability (score, sentenceComplexity, suggestions), impact (quantifiedAchievements, actionVerbs, suggestions).\n\nResume: ${resumePreview}`;
     
     if (jobDescription) {
-      prompt += '\n\nJob Description:\n' + jobDescription;
+      prompt += `\n\nJob: ${jobDescription.substring(0, 1000)}. Add jobMatch (matchScore, matchedRequirements, missingRequirements, recommendations).`;
     }
-    
-    prompt += '\n\nProvide analysis in JSON format with: score (0-100), strengths (array), improvements (array), keywords (object with found and missing arrays), formatting (object with score, issues, recommendations), sections (object with present, missing, quality), readability (object with score, sentenceComplexity, suggestions), impact (object with quantifiedAchievements, actionVerbs, suggestions)';
-    
-    if (jobDescription) {
-      prompt += ', jobMatch (object with matchScore, matchedRequirements, missingRequirements, recommendations)';
-    }
-    
-    prompt += '. Return ONLY valid JSON.';
 
+    console.log('Sending prompt to Gemini...');
     const result = await model.generateContent(prompt);
     let text = result.response.text();
+    console.log('Received response:', text.substring(0, 200));
     
     text = text.replace(/```json/g, '').replace(/```/g, '').trim();
     
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const analysis = JSON.parse(jsonMatch[0]);
-      if (!analysis.score || !analysis.strengths || !analysis.improvements || !analysis.keywords) {
-        throw new Error('Incomplete analysis');
-      }
-      res.json({ success: true, ...analysis });
-    } else {
-      throw new Error('Invalid AI response');
+    if (!jsonMatch) {
+      console.error('No JSON found in response');
+      throw new Error('AI returned invalid format');
     }
+    
+    const analysis = JSON.parse(jsonMatch[0]);
+    if (!analysis.score) {
+      console.error('Missing score in analysis');
+      throw new Error('Incomplete analysis data');
+    }
+    
+    res.json({ success: true, ...analysis });
   } catch (error: any) {
-    console.error('ATS Analysis error:', error);
+    console.error('ATS Analysis error:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ 
       success: false, 
-      error: 'Failed to analyze resume. Please try again or contact support if the issue persists.',
-      details: error.message 
+      error: error.message || 'Failed to analyze resume',
+      details: error.toString()
     });
   }
 };
