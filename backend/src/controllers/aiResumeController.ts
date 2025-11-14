@@ -107,97 +107,35 @@ export const analyzeATS = async (req: Request, res: Response) => {
     }
 
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const jobContext = jobDescription ? `
-
-Target Job Description:
-${jobDescription}` : '';
     
-    const prompt = `You are an expert ATS (Applicant Tracking System) analyzer with deep knowledge of recruitment systems used by companies like Workday, Taleo, Greenhouse, and Lever. Perform a comprehensive, professional-grade analysis of this resume as if you were a real ATS system.
-
-Resume Content:
-${resumeText}${jobContext}
-
-Analyze the resume thoroughly checking for:
-- ATS parsing compatibility (formatting, structure, readability)
-- Keyword optimization and relevance
-- Content quality and impact
-- Professional presentation
-- Section completeness
-- Quantifiable achievements
-- Action verb usage
-- Contact information clarity
-- File format compatibility indicators${jobDescription ? '
-- Job description alignment and match percentage' : ''}
-
-Provide detailed analysis in VALID JSON format with these exact fields:
-
-1. "score": Overall ATS compatibility score (0-100)${jobDescription ? ' - heavily weight job description match' : ''}
-
-2. "strengths": Array of 5-6 specific strengths found:
-   - Formatting and structure quality
-   - Keyword optimization
-   - Quantifiable achievements
-   - Professional presentation${jobDescription ? '
-   - Job requirements match' : ''}
-
-3. "improvements": Array of 5-6 actionable improvements:
-   - Missing critical sections
-   - Formatting issues for ATS parsing
-   - Keyword gaps
-   - Content optimization needs${jobDescription ? '
-   - Skills/experience gaps for target role' : ''}
-
-4. "keywords": Object with:
-   - "found": Array of 8-12 relevant keywords/skills detected${jobDescription ? ' that match job requirements' : ''}
-   - "missing": Array of 8-12 important keywords that should be added${jobDescription ? ' from job description' : ' for the industry'}
-
-5. "formatting": Object with:
-   - "score": Formatting quality score (0-100)
-   - "issues": Array of specific formatting problems (tables, columns, graphics, special characters, etc.)
-   - "recommendations": Array of formatting improvements
-
-6. "sections": Object analyzing resume sections:
-   - "present": Array of sections found (Contact, Summary, Experience, Education, Skills, etc.)
-   - "missing": Array of recommended sections not found
-   - "quality": Object with section names as keys and quality scores (0-100) as values
-
-7. "readability": Object with:
-   - "score": Readability score (0-100)
-   - "sentenceComplexity": "simple"|"moderate"|"complex"
-   - "suggestions": Array of readability improvements
-
-8. "impact": Object with:
-   - "quantifiedAchievements": Number of achievements with metrics
-   - "actionVerbs": Number of strong action verbs used
-   - "suggestions": Array of ways to increase impact
-
-${jobDescription ? '9. "jobMatch": Object with:
-   - "matchScore": How well resume matches job (0-100)
-   - "matchedRequirements": Array of job requirements clearly met
-   - "missingRequirements": Array of job requirements not addressed
-   - "recommendations": Array of specific changes to improve match
-' : ''}
-Return ONLY valid JSON, no markdown or extra text.`;
+    let prompt = 'You are an expert ATS analyzer. Analyze this resume comprehensively.\n\nResume:\n' + resumeText;
+    
+    if (jobDescription) {
+      prompt += '\n\nJob Description:\n' + jobDescription;
+    }
+    
+    prompt += '\n\nProvide analysis in JSON format with: score (0-100), strengths (array), improvements (array), keywords (object with found and missing arrays), formatting (object with score, issues, recommendations), sections (object with present, missing, quality), readability (object with score, sentenceComplexity, suggestions), impact (object with quantifiedAchievements, actionVerbs, suggestions)';
+    
+    if (jobDescription) {
+      prompt += ', jobMatch (object with matchScore, matchedRequirements, missingRequirements, recommendations)';
+    }
+    
+    prompt += '. Return ONLY valid JSON.';
 
     const result = await model.generateContent(prompt);
     let text = result.response.text();
     
-    // Clean markdown formatting
-    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    // Try to parse JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const analysis = JSON.parse(jsonMatch[0]);
-      
-      // Validate required fields
       if (!analysis.score || !analysis.strengths || !analysis.improvements || !analysis.keywords) {
-        throw new Error('Incomplete analysis data');
+        throw new Error('Incomplete analysis');
       }
-      
       res.json({ success: true, ...analysis });
     } else {
-      throw new Error('Invalid response format from AI');
+      throw new Error('Invalid AI response');
     }
   } catch (error: any) {
     console.error('ATS Analysis error:', error);
