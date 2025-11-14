@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 
 const ATSChecker: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
 
@@ -28,6 +29,9 @@ const ATSChecker: React.FC = () => {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const formData = new FormData();
       formData.append('resume', file);
+      if (jobDescription.trim()) {
+        formData.append('jobDescription', jobDescription);
+      }
       
       const response = await fetch(`${API_URL}/api/ai-resume/analyze-ats`, {
         method: 'POST',
@@ -37,11 +41,11 @@ const ATSChecker: React.FC = () => {
       if (data.success) {
         setResults(data);
       } else {
-        alert(data.error || 'Failed to analyze resume');
+        alert(data.error || 'Failed to analyze resume. Please ensure your PDF is readable and try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Analysis error:', error);
-      alert('Failed to analyze resume. Please try again.');
+      alert('Network error or service unavailable. Please check your connection and try again.');
     } finally {
       setAnalyzing(false);
     }
@@ -86,7 +90,7 @@ const ATSChecker: React.FC = () => {
                 </span>
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-                Check if your resume passes Applicant Tracking Systems with AI-powered analysis
+                Professional ATS compatibility checker powered by AI. Get detailed analysis of formatting, keywords, sections, and job match in seconds.
               </p>
 
               {/* Feature Cards */}
@@ -121,6 +125,17 @@ const ATSChecker: React.FC = () => {
                 transition={{ delay: 0.4 }}
                 className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 mb-8 border-2 border-white"
               >
+                <div className="mb-8">
+                  <label className="block text-lg font-bold text-gray-900 mb-4">Job Description (Optional)</label>
+                  <textarea
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    placeholder="Paste the job description to get role-specific analysis..."
+                    rows={6}
+                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm"
+                  />
+                </div>
+
                 <div className="text-center">
                   <input
                     type="file"
@@ -148,11 +163,22 @@ const ATSChecker: React.FC = () => {
                     <button
                       onClick={analyzeResume}
                       disabled={analyzing}
-                      className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50"
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Sparkles className="h-6 w-6" />
-                      {analyzing ? 'Analyzing Resume...' : 'Analyze with AI'}
+                      <Sparkles className={`h-6 w-6 ${analyzing ? 'animate-spin' : ''}`} />
+                      {analyzing ? 'Analyzing Resume with AI...' : 'Analyze with AI'}
                     </button>
+                    {analyzing && (
+                      <div className="mt-6">
+                        <div className="max-w-md mx-auto">
+                          <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
+                            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 h-3 rounded-full animate-pulse" style={{width: '100%'}}></div>
+                          </div>
+                          <p className="text-gray-600 text-sm font-semibold">Performing comprehensive ATS analysis...</p>
+                          <p className="text-xs text-gray-500 mt-1">Analyzing formatting, keywords, sections, readability & impact</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </motion.div>
@@ -167,6 +193,40 @@ const ATSChecker: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="space-y-8"
                 >
+                  {/* Overall Summary Card */}
+                  <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl shadow-2xl p-10 border-2 border-white">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Analysis Summary</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
+                        <div className="text-4xl font-bold text-blue-600 mb-2">{results.score}</div>
+                        <div className="text-sm text-gray-600 font-semibold">Overall ATS Score</div>
+                      </div>
+                      {results.formatting && (
+                        <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
+                          <div className="text-4xl font-bold text-indigo-600 mb-2">{results.formatting.score}</div>
+                          <div className="text-sm text-gray-600 font-semibold">Formatting Score</div>
+                        </div>
+                      )}
+                      {results.readability && (
+                        <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
+                          <div className="text-4xl font-bold text-cyan-600 mb-2">{results.readability.score}</div>
+                          <div className="text-sm text-gray-600 font-semibold">Readability Score</div>
+                        </div>
+                      )}
+                      {results.jobMatch ? (
+                        <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
+                          <div className="text-4xl font-bold text-purple-600 mb-2">{results.jobMatch.matchScore}</div>
+                          <div className="text-sm text-gray-600 font-semibold">Job Match Score</div>
+                        </div>
+                      ) : (
+                        <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
+                          <div className="text-4xl font-bold text-orange-600 mb-2">{results.impact?.quantifiedAchievements || 0}</div>
+                          <div className="text-sm text-gray-600 font-semibold">Achievements</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Score Card */}
                   <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
                     <div className="text-center mb-8">
@@ -283,11 +343,224 @@ const ATSChecker: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Formatting Analysis */}
+                  {results.formatting && (
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center shadow-lg">
+                          <FileText className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-3xl font-bold text-gray-900">Formatting Analysis</h3>
+                          <p className="text-gray-600">Score: {results.formatting.score}/100</p>
+                        </div>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3">Issues Found</h4>
+                          <ul className="space-y-2">
+                            {results.formatting.issues.map((issue: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2 text-gray-700">
+                                <span className="text-red-600 mt-1">⚠</span>
+                                <span>{issue}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3">Recommendations</h4>
+                          <ul className="space-y-2">
+                            {results.formatting.recommendations.map((rec: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2 text-gray-700">
+                                <span className="text-blue-600 mt-1">→</span>
+                                <span>{rec}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sections Analysis */}
+                  {results.sections && (
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-teal-600 to-green-600 flex items-center justify-center shadow-lg">
+                          <CheckCircle className="h-6 w-6 text-white" />
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">Resume Sections</h3>
+                      </div>
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3">Present</h4>
+                          <div className="space-y-2">
+                            {results.sections.present.map((section: string, i: number) => (
+                              <div key={i} className="flex items-center gap-2 text-green-700 bg-green-50 px-3 py-2 rounded-lg">
+                                <CheckCircle className="h-4 w-4" />
+                                <span className="font-semibold">{section}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3">Missing</h4>
+                          <div className="space-y-2">
+                            {results.sections.missing.map((section: string, i: number) => (
+                              <div key={i} className="flex items-center gap-2 text-orange-700 bg-orange-50 px-3 py-2 rounded-lg">
+                                <XCircle className="h-4 w-4" />
+                                <span className="font-semibold">{section}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3">Quality Scores</h4>
+                          <div className="space-y-2">
+                            {Object.entries(results.sections.quality).map(([section, score]: [string, any], i: number) => (
+                              <div key={i} className="bg-gray-50 px-3 py-2 rounded-lg">
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="font-semibold text-gray-900">{section}</span>
+                                  <span className="text-sm font-bold text-gray-700">{score}/100</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full" style={{width: `${score}%`}}></div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Readability & Impact */}
+                  {(results.readability || results.impact) && (
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {results.readability && (
+                        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg">
+                              <FileText className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="text-2xl font-bold text-gray-900">Readability</h3>
+                              <p className="text-gray-600">Score: {results.readability.score}/100</p>
+                            </div>
+                          </div>
+                          <div className="mb-4">
+                            <span className="text-sm font-semibold text-gray-600">Complexity: </span>
+                            <span className="text-lg font-bold text-gray-900 capitalize">{results.readability.sentenceComplexity}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-600 mb-2">Suggestions</h4>
+                            <ul className="space-y-2">
+                              {results.readability.suggestions.map((sug: string, i: number) => (
+                                <li key={i} className="text-gray-700 text-sm flex items-start gap-2">
+                                  <span className="text-cyan-600 mt-0.5">•</span>
+                                  <span>{sug}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                      {results.impact && (
+                        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center shadow-lg">
+                              <TrendingUp className="h-6 w-6 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900">Impact Analysis</h3>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border-2 border-orange-200">
+                              <div className="text-3xl font-bold text-orange-600">{results.impact.quantifiedAchievements}</div>
+                              <div className="text-sm text-gray-600">Quantified Achievements</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border-2 border-orange-200">
+                              <div className="text-3xl font-bold text-orange-600">{results.impact.actionVerbs}</div>
+                              <div className="text-sm text-gray-600">Action Verbs</div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-600 mb-2">Suggestions</h4>
+                            <ul className="space-y-2">
+                              {results.impact.suggestions.map((sug: string, i: number) => (
+                                <li key={i} className="text-gray-700 text-sm flex items-start gap-2">
+                                  <span className="text-orange-600 mt-0.5">•</span>
+                                  <span>{sug}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Job Match Analysis */}
+                  {results.jobMatch && (
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl shadow-2xl p-10 border-2 border-purple-200">
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+                          <Award className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-3xl font-bold text-gray-900">Job Match Analysis</h3>
+                          <p className="text-gray-600">Match Score: {results.jobMatch.matchScore}/100</p>
+                        </div>
+                      </div>
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3 flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            Matched Requirements
+                          </h4>
+                          <ul className="space-y-2">
+                            {results.jobMatch.matchedRequirements.map((req: string, i: number) => (
+                              <li key={i} className="text-gray-700 bg-white px-3 py-2 rounded-lg shadow-sm">
+                                {req}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3 flex items-center gap-2">
+                            <XCircle className="h-5 w-5 text-red-600" />
+                            Missing Requirements
+                          </h4>
+                          <ul className="space-y-2">
+                            {results.jobMatch.missingRequirements.map((req: string, i: number) => (
+                              <li key={i} className="text-gray-700 bg-white px-3 py-2 rounded-lg shadow-sm">
+                                {req}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 mb-3 flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-blue-600" />
+                            Recommendations
+                          </h4>
+                          <ul className="space-y-2">
+                            {results.jobMatch.recommendations.map((rec: string, i: number) => (
+                              <li key={i} className="text-gray-700 bg-white px-3 py-2 rounded-lg shadow-sm">
+                                {rec}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-6 justify-center">
                     <button
                       onClick={() => {
                         setFile(null);
+                        setJobDescription('');
                         setResults(null);
                       }}
                       className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105"
