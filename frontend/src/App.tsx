@@ -37,6 +37,8 @@ import AuthCallbackPage from './pages/AuthCallbackPage';
 import ChatPage from './pages/ChatPage';
 import SeekerChatPage from './pages/SeekerChatPage';
 import ReferrerChatPage from './pages/ReferrerChatPage';
+import ResumeBuilder from './pages/ResumeBuilder';
+import ATSChecker from './pages/ATSChecker';
 import Chatbot from './components/Chatbot';
 
 function LandingPage() {
@@ -89,6 +91,8 @@ function App() {
         <Route path="/seeker/dashboard" element={<DashboardPage />} />
         <Route path="/seeker/chat" element={<SeekerChatPage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/resume-builder" element={<ResumeBuilder />} />
+        <Route path="/ats-checker" element={<ATSChecker />} />
         
         {/* Referrer Routes */}
         <Route path="/referrer/join" element={<BecomeReferrerPage />} />

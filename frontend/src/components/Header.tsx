@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, User, LogOut, LayoutDashboard, Wallet, Briefcase } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Wallet, Briefcase, FileText, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Logo = () => (
@@ -9,7 +9,7 @@ const Logo = () => (
   </Link>
 );
 
-const NavLinks = ({ className, isLoggedIn, userRole }: { className?: string; isLoggedIn: boolean; userRole?: string }) => (
+const NavLinks = ({ className, isLoggedIn, userRole, showResumeDropdown, setShowResumeDropdown }: { className?: string; isLoggedIn: boolean; userRole?: string; showResumeDropdown?: boolean; setShowResumeDropdown?: (show: boolean) => void }) => (
   <nav className={`flex items-center gap-1 ${className}`}>
     {isLoggedIn ? (
       userRole === 'referrer' ? (
@@ -24,7 +24,39 @@ const NavLinks = ({ className, isLoggedIn, userRole }: { className?: string; isL
         <>
           <Link to="/seeker/dashboard" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-purple hover:to-brand-magenta font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">Dashboard</Link>
           <Link to="/jobs" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-magenta hover:to-brand-teal font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">Jobs</Link>
-          <Link to="/referrers" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-purple font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">Referrers</Link>
+          <div className="relative">
+            <button
+              onClick={() => setShowResumeDropdown?.(!showResumeDropdown)}
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-purple font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            >
+              Resume Tools
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            {showResumeDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-full mt-2 w-48 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
+              >
+                <Link
+                  to="/resume-builder"
+                  onClick={() => setShowResumeDropdown?.(false)}
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-gradient-to-r hover:from-brand-purple/10 hover:to-brand-magenta/10 transition-all"
+                >
+                  <FileText className="h-4 w-4 text-brand-purple" />
+                  <span className="text-gray-800 font-medium">Resume Builder</span>
+                </Link>
+                <Link
+                  to="/ats-checker"
+                  onClick={() => setShowResumeDropdown?.(false)}
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-gradient-to-r hover:from-brand-purple/10 hover:to-brand-magenta/10 transition-all"
+                >
+                  <FileText className="h-4 w-4 text-brand-magenta" />
+                  <span className="text-gray-800 font-medium">ATS Checker</span>
+                </Link>
+              </motion.div>
+            )}
+          </div>
           <Link to="/ai-apply" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-purple hover:to-brand-teal font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">AI Apply</Link>
           <Link to="/seeker/wallet" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-magenta hover:to-brand-purple font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">Wallet</Link>
         </>
@@ -44,6 +76,7 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showResumeDropdown, setShowResumeDropdown] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,7 +112,7 @@ const Header: React.FC = () => {
           <div className="relative z-10 flex items-center justify-between w-full">
             <Logo />
             <div className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
-            <NavLinks isLoggedIn={!!user} userRole={user?.role} />
+            <NavLinks isLoggedIn={!!user} userRole={user?.role} showResumeDropdown={showResumeDropdown} setShowResumeDropdown={setShowResumeDropdown} />
           </div>
           <div className="hidden md:flex items-center gap-3">
             {user ? (
@@ -170,7 +203,13 @@ const Header: React.FC = () => {
           className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl shadow-2xl pb-6 border-b border-gray-200/50"
         >
           <div className="container mx-auto px-6 flex flex-col items-center gap-5 pt-4">
-            <NavLinks className="flex-col !gap-5" isLoggedIn={!!user} userRole={user?.role} />
+            <NavLinks className="flex-col !gap-5" isLoggedIn={!!user} userRole={user?.role} showResumeDropdown={showResumeDropdown} setShowResumeDropdown={setShowResumeDropdown} />
+            {user?.role === 'seeker' && (
+              <div className="flex flex-col gap-3 w-full max-w-xs">
+                <Link to="/resume-builder" onClick={() => setIsMenuOpen(false)} className="text-gray-700 hover:text-brand-purple font-medium transition-all duration-200 text-center">Resume Builder</Link>
+                <Link to="/ats-checker" onClick={() => setIsMenuOpen(false)} className="text-gray-700 hover:text-brand-purple font-medium transition-all duration-200 text-center">ATS Checker</Link>
+              </div>
+            )}
             <hr className="w-full my-2 border-gray-200"/>
             {user ? (
               <>

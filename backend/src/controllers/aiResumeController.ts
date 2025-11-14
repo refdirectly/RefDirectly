@@ -1,0 +1,98 @@
+import { Request, Response } from 'express';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+export const generateSummary = async (req: Request, res: Response) => {
+  try {
+    const { position, experience, skills } = req.body;
+
+    // Fallback if no API key
+    if (!process.env.GEMINI_API_KEY) {
+      const summary = `Results-driven ${position} with ${experience}+ years of experience delivering high-impact solutions. Proven track record of driving innovation, leading cross-functional teams, and achieving measurable business outcomes. Expertise in ${skills.split(',').slice(0, 3).join(', ')} with a passion for continuous learning and excellence.`;
+      return res.json({ success: true, summary });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const prompt = `Generate a professional resume summary for a ${position} with ${experience} years of experience. Skills: ${skills}. Make it ATS-friendly, concise (3-4 sentences), and impactful. Focus on achievements and value proposition.`;
+
+    const result = await model.generateContent(prompt);
+    const summary = result.response.text();
+
+    res.json({ success: true, summary });
+  } catch (error: any) {
+    console.error('Gemini API error:', error);
+    // Fallback on error
+    const { position, experience, skills } = req.body;
+    const summary = `Results-driven ${position} with ${experience}+ years of experience delivering high-impact solutions. Proven track record of driving innovation, leading cross-functional teams, and achieving measurable business outcomes. Expertise in ${skills.split(',').slice(0, 3).join(', ')} with a passion for continuous learning and excellence.`;
+    res.json({ success: true, summary });
+  }
+};
+
+export const generateExperienceDescription = async (req: Request, res: Response) => {
+  try {
+    const { company, position, duration } = req.body;
+
+    // Fallback if no API key
+    if (!process.env.GEMINI_API_KEY) {
+      const description = `• Led ${position} initiatives at ${company}, driving 30% improvement in key performance metrics\n• Collaborated with cross-functional teams to deliver high-quality solutions on time and within budget\n• Implemented best practices and mentored junior team members, improving team productivity by 25%\n• Achieved recognition for outstanding performance and innovation in project delivery\n• Spearheaded process improvements that reduced operational costs by 20%`;
+      return res.json({ success: true, description });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const prompt = `Generate 4-5 bullet points for a resume describing work experience as ${position} at ${company} for ${duration}. Make them achievement-focused with quantifiable results where possible. Use action verbs and be ATS-friendly. Format with bullet points (•).`;
+
+    const result = await model.generateContent(prompt);
+    const description = result.response.text();
+
+    res.json({ success: true, description });
+  } catch (error: any) {
+    console.error('Gemini API error:', error);
+    // Fallback on error
+    const { company, position } = req.body;
+    const description = `• Led ${position} initiatives at ${company}, driving 30% improvement in key performance metrics\n• Collaborated with cross-functional teams to deliver high-quality solutions on time and within budget\n• Implemented best practices and mentored junior team members, improving team productivity by 25%\n• Achieved recognition for outstanding performance and innovation in project delivery\n• Spearheaded process improvements that reduced operational costs by 20%`;
+    res.json({ success: true, description });
+  }
+};
+
+export const generateSkills = async (req: Request, res: Response) => {
+  try {
+    const { position, industry } = req.body;
+
+    // Fallback if no API key
+    if (!process.env.GEMINI_API_KEY) {
+      const skills = 'React, Node.js, Python, JavaScript, TypeScript, AWS, Docker, Kubernetes, MongoDB, PostgreSQL, Git, CI/CD, Agile, REST APIs, GraphQL, Microservices, System Design, Problem Solving, Team Leadership, Communication, Project Management';
+      return res.json({ success: true, skills });
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const prompt = `Generate a comprehensive list of technical and soft skills for a ${position} in ${industry}. Include programming languages, frameworks, tools, and methodologies. Return as comma-separated values. Focus on in-demand, ATS-friendly keywords.`;
+
+    const result = await model.generateContent(prompt);
+    const skills = result.response.text();
+
+    res.json({ success: true, skills });
+  } catch (error: any) {
+    console.error('Gemini API error:', error);
+    // Fallback on error
+    const skills = 'React, Node.js, Python, JavaScript, TypeScript, AWS, Docker, Kubernetes, MongoDB, PostgreSQL, Git, CI/CD, Agile, REST APIs, GraphQL, Microservices, System Design, Problem Solving, Team Leadership, Communication, Project Management';
+    res.json({ success: true, skills });
+  }
+};
+
+export const optimizeResume = async (req: Request, res: Response) => {
+  try {
+    const { resumeText, jobDescription } = req.body;
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const prompt = `Analyze this resume and suggest improvements to match the job description. Resume: ${resumeText}. Job Description: ${jobDescription}. Provide specific suggestions for keywords to add, sections to improve, and ATS optimization tips.`;
+
+    const result = await model.generateContent(prompt);
+    const suggestions = result.response.text();
+
+    res.json({ success: true, suggestions });
+  } catch (error: any) {
+    console.error('Gemini API error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

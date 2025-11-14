@@ -24,6 +24,7 @@ import walletRoutes from './routes/wallet';
 import jobPostingRoutes from './routes/jobPostings';
 import escrowRoutes from './routes/escrow';
 import chatRoutes from './routes/chat';
+import aiResumeRoutes from './routes/aiResume';
 
 dotenv.config();
 
@@ -89,6 +90,7 @@ app.use('/api/job-postings', jobPostingRoutes);
 app.use('/api/escrow', escrowRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ai-resume', aiResumeRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

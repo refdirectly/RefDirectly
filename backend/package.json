@@ -8,6 +8,7 @@
     "seed": "ts-node src/scripts/seedJobs.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@types/node-cron": "^3.0.11",
     "aws-sdk": "^2.1498.0",
     "axios": "^1.13.2",
