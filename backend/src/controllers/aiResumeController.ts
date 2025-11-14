@@ -14,7 +14,7 @@ export const generateSummary = async (req: Request, res: Response) => {
       return res.json({ success: true, summary });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Generate a professional resume summary for a ${position} with ${experience} years of experience. Skills: ${skills}. Make it ATS-friendly, concise (3-4 sentences), and impactful. Focus on achievements and value proposition.`;
 
     const result = await model.generateContent(prompt);
@@ -40,7 +40,7 @@ export const generateExperienceDescription = async (req: Request, res: Response)
       return res.json({ success: true, description });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Generate 4-5 bullet points for a resume describing work experience as ${position} at ${company} for ${duration}. Make them achievement-focused with quantifiable results where possible. Use action verbs and be ATS-friendly. Format with bullet points (•).`;
 
     const result = await model.generateContent(prompt);
@@ -66,7 +66,7 @@ export const generateSkills = async (req: Request, res: Response) => {
       return res.json({ success: true, skills });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Generate a comprehensive list of technical and soft skills for a ${position} in ${industry}. Include programming languages, frameworks, tools, and methodologies. Return as comma-separated values. Focus on in-demand, ATS-friendly keywords.`;
 
     const result = await model.generateContent(prompt);
@@ -106,7 +106,7 @@ export const analyzeATS = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, error: 'AI service not configured. Please contact administrator.' });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
     const resumePreview = resumeText.substring(0, 3000);
     let prompt = `Analyze this resume for ATS compatibility. Return JSON with: score, strengths, improvements, keywords (found, missing), formatting (score, issues, recommendations), sections (present, missing, quality), readability (score, sentenceComplexity, suggestions), impact (quantifiedAchievements, actionVerbs, suggestions).\n\nResume: ${resumePreview}`;
@@ -150,7 +150,7 @@ export const optimizeResume = async (req: Request, res: Response) => {
   try {
     const { resumeText, jobDescription } = req.body;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Analyze this resume and suggest improvements to match the job description. Resume: ${resumeText}. Job Description: ${jobDescription}. Provide specific suggestions for keywords to add, sections to improve, and ATS optimization tips.`;
 
     const result = await model.generateContent(prompt);
