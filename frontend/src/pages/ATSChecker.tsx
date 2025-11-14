@@ -1,216 +1,320 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Upload, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, CheckCircle, XCircle, AlertCircle, FileText, Sparkles, TrendingUp, Award } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const ATSChecker: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
+  const [resumeText, setResumeText] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setResults(null);
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setResumeText(event.target?.result as string);
+        setResults(null);
+      };
+      reader.readAsText(file);
     }
   };
 
-  const analyzeResume = () => {
+  const analyzeResume = async () => {
+    if (!resumeText.trim()) {
+      alert('Please paste your resume text or upload a file');
+      return;
+    }
+    
     setAnalyzing(true);
-    // Simulate analysis
-    setTimeout(() => {
-      setResults({
-        score: 78,
-        strengths: [
-          'Clear contact information',
-          'Quantified achievements',
-          'Relevant keywords present',
-          'Professional formatting',
-        ],
-        improvements: [
-          'Add more industry-specific keywords',
-          'Include measurable results in experience section',
-          'Optimize for ATS parsing with simpler formatting',
-        ],
-        keywords: {
-          found: ['React', 'JavaScript', 'Node.js', 'AWS', 'Python'],
-          missing: ['Docker', 'Kubernetes', 'CI/CD', 'Microservices'],
-        },
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/ai-resume/analyze-ats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeText })
       });
+      const data = await response.json();
+      if (data.success) {
+        setResults(data);
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      alert('Failed to analyze resume. Please try again.');
+    } finally {
       setAnalyzing(false);
-    }, 2000);
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'from-green-600 to-emerald-600';
+    if (score >= 60) return 'from-yellow-600 to-orange-600';
+    return 'from-red-600 to-pink-600';
+  };
+
+  const getScoreText = (score: number) => {
+    if (score >= 80) return 'Excellent! Your resume is ATS-friendly';
+    if (score >= 60) return 'Good, but needs improvements';
+    return 'Needs significant improvements';
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
       <Header />
       <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto"
+            className="max-w-6xl mx-auto"
           >
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-gradient-primary text-white px-5 py-2 rounded-full mb-4">
-                <FileText className="h-4 w-4" />
-                <span className="text-sm font-semibold">AI-Powered Analysis</span>
-              </div>
-              <h1 className="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            {/* Hero Section */}
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full mb-6 shadow-xl"
+              >
+                <Sparkles className="h-5 w-5 animate-pulse" />
+                <span className="text-sm font-bold tracking-wide">AI-POWERED ATS ANALYSIS</span>
+              </motion.div>
+              <h1 className="font-display text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
                 ATS Score Checker
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mt-2">
+                  Beat the Bots
+                </span>
               </h1>
-              <p className="text-lg text-gray-600">
-                Check if your resume passes Applicant Tracking Systems
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+                Check if your resume passes Applicant Tracking Systems with AI-powered analysis
               </p>
-            </div>
 
-            <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="resume-upload"
-                />
-                <label
-                  htmlFor="resume-upload"
-                  className="cursor-pointer flex flex-col items-center"
-                >
-                  <div className="h-20 w-20 rounded-full bg-gradient-primary text-white flex items-center justify-center mb-4">
-                    <Upload className="h-10 w-10" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {file ? file.name : 'Upload Your Resume'}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Supports PDF, DOC, DOCX (Max 5MB)
-                  </p>
-                  <button className="bg-gradient-primary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
-                    Choose File
-                  </button>
-                </label>
-              </div>
-
-              {file && !results && (
-                <div className="mt-6 text-center">
-                  <button
-                    onClick={analyzeResume}
-                    disabled={analyzing}
-                    className="bg-gradient-primary text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all hover:scale-105 disabled:opacity-50"
+              {/* Feature Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {[
+                  { icon: Sparkles, title: 'AI Analysis', desc: 'Powered by Gemini', gradient: 'from-blue-600 to-cyan-600', bg: 'from-blue-50 to-blue-100' },
+                  { icon: TrendingUp, title: 'ATS Score', desc: 'Instant feedback', gradient: 'from-purple-600 to-pink-600', bg: 'from-purple-50 to-purple-100' },
+                  { icon: Award, title: 'Optimization', desc: 'Actionable tips', gradient: 'from-pink-600 to-red-600', bg: 'from-pink-50 to-pink-100' }
+                ].map((feature, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * i }}
+                    className={`bg-gradient-to-br ${feature.bg} rounded-3xl p-8 border-2 border-white shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1`}
                   >
-                    {analyzing ? 'Analyzing...' : 'Analyze Resume'}
-                  </button>
-                </div>
-              )}
+                    <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 mx-auto shadow-lg`}>
+                      <feature.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-lg text-gray-900 mb-2">{feature.title}</h3>
+                    <p className="text-sm text-gray-600">{feature.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            {results && (
+            {/* Upload Section */}
+            {!results && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
+                transition={{ delay: 0.4 }}
+                className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 mb-8 border-2 border-white"
               >
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                  <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center h-32 w-32 rounded-full bg-gradient-primary text-white mb-4">
-                      <span className="text-5xl font-bold">{results.score}</span>
-                    </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">ATS Score</h2>
-                    <p className="text-gray-600">
-                      {results.score >= 80
-                        ? 'Excellent! Your resume is ATS-friendly'
-                        : results.score >= 60
-                        ? 'Good, but needs some improvements'
-                        : 'Needs significant improvements'}
-                    </p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="bg-green-50 rounded-xl p-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <CheckCircle className="h-6 w-6 text-green-600" />
-                        <h3 className="text-xl font-bold text-gray-900">Strengths</h3>
-                      </div>
-                      <ul className="space-y-2">
-                        {results.strengths.map((strength: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 text-gray-700">
-                            <span className="text-green-600 mt-1">✓</span>
-                            {strength}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="bg-orange-50 rounded-xl p-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <AlertCircle className="h-6 w-6 text-orange-600" />
-                        <h3 className="text-xl font-bold text-gray-900">Improvements</h3>
-                      </div>
-                      <ul className="space-y-2">
-                        {results.improvements.map((improvement: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 text-gray-700">
-                            <span className="text-orange-600 mt-1">!</span>
-                            {improvement}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Keyword Analysis</h3>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        Found Keywords
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {results.keywords.found.map((keyword: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <XCircle className="h-5 w-5 text-red-600" />
-                        Missing Keywords
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {results.keywords.missing.map((keyword: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                <div className="mb-8">
+                  <label className="block text-lg font-bold text-gray-900 mb-4">Paste Your Resume Text</label>
+                  <textarea
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                    placeholder="Paste your resume content here..."
+                    rows={12}
+                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 font-mono text-sm"
+                  />
                 </div>
 
                 <div className="text-center">
-                  <button
-                    onClick={() => {
-                      setFile(null);
-                      setResults(null);
-                    }}
-                    className="bg-gradient-primary text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all hover:scale-105"
+                  <div className="mb-6">
+                    <span className="text-gray-500 font-semibold">OR</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept=".txt"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="resume-upload"
+                  />
+                  <label
+                    htmlFor="resume-upload"
+                    className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-8 py-4 rounded-2xl font-bold cursor-pointer hover:shadow-xl transition-all hover:scale-105"
                   >
-                    Check Another Resume
-                  </button>
+                    <Upload className="h-5 w-5" />
+                    Upload Text File
+                  </label>
                 </div>
+
+                {resumeText && (
+                  <div className="mt-8 text-center">
+                    <button
+                      onClick={analyzeResume}
+                      disabled={analyzing}
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50"
+                    >
+                      <Sparkles className="h-6 w-6" />
+                      {analyzing ? 'Analyzing Resume...' : 'Analyze with AI'}
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
+
+            {/* Results Section */}
+            <AnimatePresence>
+              {results && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-8"
+                >
+                  {/* Score Card */}
+                  <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
+                    <div className="text-center mb-8">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', duration: 0.6 }}
+                        className={`inline-flex items-center justify-center h-40 w-40 rounded-full bg-gradient-to-br ${getScoreColor(results.score)} text-white mb-6 shadow-2xl`}
+                      >
+                        <span className="text-6xl font-bold">{results.score}</span>
+                      </motion.div>
+                      <h2 className="text-4xl font-bold text-gray-900 mb-3">ATS Score</h2>
+                      <p className="text-xl text-gray-600">{getScoreText(results.score)}</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {/* Strengths */}
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center shadow-lg">
+                            <CheckCircle className="h-6 w-6 text-white" />
+                          </div>
+                          <h3 className="text-2xl font-bold text-gray-900">Strengths</h3>
+                        </div>
+                        <ul className="space-y-3">
+                          {results.strengths.map((strength: string, index: number) => (
+                            <motion.li
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex items-start gap-3 text-gray-700"
+                            >
+                              <span className="text-green-600 text-xl mt-0.5">✓</span>
+                              <span>{strength}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Improvements */}
+                      <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8 border-2 border-orange-200">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center shadow-lg">
+                            <AlertCircle className="h-6 w-6 text-white" />
+                          </div>
+                          <h3 className="text-2xl font-bold text-gray-900">Improvements</h3>
+                        </div>
+                        <ul className="space-y-3">
+                          {results.improvements.map((improvement: string, index: number) => (
+                            <motion.li
+                              key={index}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex items-start gap-3 text-gray-700"
+                            >
+                              <span className="text-orange-600 text-xl mt-0.5">!</span>
+                              <span>{improvement}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Keywords Analysis */}
+                  <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-2 border-white">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+                        <FileText className="h-6 w-6 text-white" />
+                      </div>
+                      <h3 className="text-3xl font-bold text-gray-900">Keyword Analysis</h3>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div>
+                        <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          Found Keywords
+                        </h4>
+                        <div className="flex flex-wrap gap-3">
+                          {results.keywords.found.map((keyword: string, index: number) => (
+                            <motion.span
+                              key={index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-4 py-2 rounded-xl text-sm font-semibold border-2 border-green-200"
+                            >
+                              {keyword}
+                            </motion.span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                          <XCircle className="h-5 w-5 text-red-600" />
+                          Missing Keywords
+                        </h4>
+                        <div className="flex flex-wrap gap-3">
+                          {results.keywords.missing.map((keyword: string, index: number) => (
+                            <motion.span
+                              key={index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="bg-gradient-to-r from-red-100 to-pink-100 text-red-700 px-4 py-2 rounded-xl text-sm font-semibold border-2 border-red-200"
+                            >
+                              {keyword}
+                            </motion.span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                    <button
+                      onClick={() => {
+                        setResumeText('');
+                        setResults(null);
+                      }}
+                      className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105"
+                    >
+                      <Sparkles className="h-6 w-6" />
+                      Check Another Resume
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/resume-builder'}
+                      className="flex items-center gap-3 bg-white border-2 border-purple-600 text-purple-600 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-purple-600 hover:text-white hover:shadow-2xl transition-all hover:scale-105"
+                    >
+                      <FileText className="h-6 w-6" />
+                      Build Better Resume
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </main>
