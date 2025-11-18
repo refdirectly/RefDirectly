@@ -12,7 +12,6 @@ import { createNotificationHandler } from './sockets/notification';
 import { startScheduler } from './utils/scheduler';
 import { startEscrowCron } from './utils/escrowCron';
 import authRoutes from './routes/auth';
-import notificationRoutes from './routes/notifications';
 import referralRoutes from './routes/referrals';
 import paymentRoutes from './routes/payments';
 import matchingRoutes from './routes/matching';
@@ -90,7 +89,6 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/job-postings', jobPostingRoutes);
 app.use('/api/escrow', escrowRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai-resume', aiResumeRoutes);
 app.use('/api/notifications', notificationRoutes);
 
