@@ -15,28 +15,15 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userId = localStorage.getItem('userId');
-
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/referrals`, {
+      const response = await fetch(`${API_URL}/api/referral-requests`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          jobId: job._id,
-          referrerId: job.organizationId || user.id,
-          company: job.company,
-          role: job.title,
-          message: 'Referral request for ' + job.title,
-          seekerProfile: {
-            name: user.name,
-            email: user.email
-          }
-        })
+        body: JSON.stringify({ jobPostingId: job._id })
       });
 
       const data = await response.json();
@@ -46,10 +33,9 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
         setTimeout(() => {
           onClose();
           setSuccess(false);
-          window.location.href = '/seeker/dashboard';
         }, 2000);
       } else {
-        alert('Failed: ' + data.message);
+        alert(data.message || 'Failed to send request');
       }
     } catch (error: any) {
       alert('Error: ' + error.message);
@@ -114,7 +100,7 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
                 <div className="bg-blue-50 rounded-xl p-4 mb-6 flex gap-3">
                   <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-blue-900">
-                    Payment will be processed using dummy funds. The referrer will be notified of your request.
+                    Your request will be sent to all verified referrers at {job.company}. They will be notified immediately.
                   </p>
                 </div>
 

@@ -4,45 +4,61 @@ import ReferralRequest from '../models/ReferralRequest';
 import User from '../models/User';
 import Notification from '../models/Notification';
 import ChatRoom from '../models/ChatRoom';
+import JobPosting from '../models/JobPosting';
 
 export const createReferralRequest = async (req: AuthRequest, res: Response) => {
   try {
-    const { company, role, skills, description, resumeUrl, reward } = req.body;
+    const { jobPostingId } = req.body;
     const seekerId = req.user?.userId;
+
+    const jobPosting = await JobPosting.findById(jobPostingId);
+    if (!jobPosting) {
+      return res.status(404).json({ success: false, message: 'Job posting not found' });
+    }
+
+    const seeker = await User.findById(seekerId);
+    if (!seeker) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const eligibleReferrers = await User.find({
+      role: 'referrer',
+      'companies.name': jobPosting.company,
+      'companies.verified': true
+    });
+
+    if (eligibleReferrers.length === 0) {
+      return res.status(404).json({ success: false, message: 'No eligible referrers found for this company' });
+    }
 
     const referralRequest = new ReferralRequest({
       seekerId,
-      company,
-      role,
-      skills,
-      description,
-      resumeUrl,
-      reward,
+      company: jobPosting.company,
+      role: jobPosting.title,
+      skills: jobPosting.requirements || [],
+      description: jobPosting.description,
+      resumeUrl: seeker.linkedinUrl || '',
+      reward: jobPosting.referralReward,
       status: 'pending'
     });
 
     await referralRequest.save();
 
-    const eligibleReferrers = await User.find({
-      role: 'referrer',
-      'companies.name': company,
-      'companies.verified': true
-    });
-
     const notificationPromises = eligibleReferrers.map(async (referrer) => {
       return Notification.create({
         userId: referrer._id,
         type: 'referral_request',
-        title: `New Referral Request - ${company}`,
-        message: `${role} position at ${company}. Reward: $${reward}`,
+        title: `New Referral Request - ${jobPosting.company}`,
+        message: `${jobPosting.title} at ${jobPosting.company}. Reward: $${jobPosting.referralReward}`,
         status: 'waiting',
         jobRequestId: referralRequest._id,
         metadata: {
-          company,
-          role,
-          skills,
-          reward,
-          seekerId
+          company: jobPosting.company,
+          role: jobPosting.title,
+          location: jobPosting.location,
+          reward: jobPosting.referralReward,
+          seekerId,
+          jobPostingId
         }
       });
     });
@@ -51,7 +67,7 @@ export const createReferralRequest = async (req: AuthRequest, res: Response) => 
 
     res.status(201).json({ 
       success: true, 
-      referralRequest,
+      message: `Request sent to ${eligibleReferrers.length} referrer(s)`,
       notificationsSent: eligibleReferrers.length
     });
   } catch (error: any) {
@@ -115,17 +131,7 @@ export const acceptReferralRequest = async (req: AuthRequest, res: Response) => 
   }
 };
 
-export const getReferralRequests = async (req: AuthRequest, res: Response) => {
-  try {
-    const seekerId = req.user?.userId;
-    const requests = await ReferralRequest.find({ seekerId })
-      .populate('acceptedBy', 'name email companies')
-      .sort({ createdAt: -1 });
-    res.json({ success: true, requests });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+
 
 export const completeReferralRequest = async (req: AuthRequest, res: Response) => {
   try {
