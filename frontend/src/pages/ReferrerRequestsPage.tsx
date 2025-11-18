@@ -245,7 +245,7 @@ const ReferrerRequestsPage: React.FC = () => {
                         {request.status === 'accepted' && (
                           <>
                             <button 
-                              onClick={() => navigate('/chat')}
+                              onClick={() => navigate(`/chat?room=${request.chatRoomId || request._id}`)}
                               className="flex-1 bg-gradient-primary text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all"
                             >
                               💬 Open Chat
