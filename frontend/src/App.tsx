@@ -14,7 +14,7 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import AboutPage from './pages/AboutPage';
 import TestimonialsPage from './pages/TestimonialsPage';
 import BecomeReferrerPage from './pages/BecomeReferrerPage';
-import FindReferrerPage from './pages/FindReferrerPage';
+
 import JobsPage from './pages/JobsPage';
 import ReferrersPage from './pages/ReferrersPage';
 import AIApplyPage from './pages/AIApplyPage';
@@ -97,6 +97,7 @@ function App() {
         <Route path="/ats-checker" element={<ATSChecker />} />
         <Route path="/find-referrer" element={<FindReferrer />} />
         <Route path="/my-requests" element={<MyReferralRequests />} />
+        <Route path="/referrers/find" element={<FindReferrer />} />
         
         {/* Referrer Routes */}
         <Route path="/referrer/join" element={<BecomeReferrerPage />} />
@@ -119,7 +120,6 @@ function App() {
         <Route path="/referrer-requests" element={<ReferrerRequestsPage />} />
         <Route path="/referrer-earnings" element={<ReferrerEarningsPage />} />
         <Route path="/become-referrer" element={<BecomeReferrerPage />} />
-        <Route path="/find-referrer" element={<FindReferrerPage />} />
         <Route path="/company/:companyId" element={<CompanyPage />} />
       </Routes>
     </BrowserRouter>
