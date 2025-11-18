@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, User, LogOut, LayoutDashboard, Wallet, Briefcase, FileText, ChevronDown } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Wallet, Briefcase, FileText, ChevronDown, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Logo = () => (
@@ -77,6 +77,8 @@ const Header: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showResumeDropdown, setShowResumeDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(3);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -116,7 +118,78 @@ const Header: React.FC = () => {
           </div>
           <div className="hidden md:flex items-center gap-3">
             {user ? (
-              <div className="relative">
+              <>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-2.5 rounded-full bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200/50 transition-all duration-200 hover:shadow-md group"
+                  >
+                    <Bell className="h-5 w-5 text-gray-700 group-hover:text-brand-purple transition-colors" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  {showNotifications && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      className="absolute right-0 mt-2 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden"
+                    >
+                      <div className="bg-gradient-to-r from-brand-purple to-brand-magenta p-4">
+                        <h3 className="text-white font-bold text-lg">Notifications</h3>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        <div className="p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer">
+                          <div className="flex items-start gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                              <Briefcase className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-900">New job match found!</p>
+                              <p className="text-xs text-gray-600 mt-1">Senior Developer at Google matches your profile</p>
+                              <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
+                            </div>
+                            <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>
+                          </div>
+                        </div>
+                        <div className="p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer">
+                          <div className="flex items-start gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                              <Wallet className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-900">Payment received</p>
+                              <p className="text-xs text-gray-600 mt-1">$50 referral bonus credited to your wallet</p>
+                              <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
+                            </div>
+                            <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0 mt-2"></div>
+                          </div>
+                        </div>
+                        <div className="p-3 hover:bg-gray-50 transition-colors cursor-pointer">
+                          <div className="flex items-start gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                              <FileText className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-900">Application update</p>
+                              <p className="text-xs text-gray-600 mt-1">Your application for Meta was viewed</p>
+                              <p className="text-xs text-gray-400 mt-1">1 day ago</p>
+                            </div>
+                            <div className="h-2 w-2 rounded-full bg-purple-500 flex-shrink-0 mt-2"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-gray-50 border-t border-gray-200">
+                        <button className="text-sm font-semibold text-brand-purple hover:text-brand-magenta transition-colors w-full text-center">
+                          View all notifications
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+                <div className="relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200/50 transition-all duration-200 hover:shadow-md"
@@ -177,6 +250,7 @@ const Header: React.FC = () => {
                   </motion.div>
                 )}
               </div>
+              </>
             ) : (
               <>
                 <Link to="/auth/login" className="text-gray-700 hover:text-brand-purple font-bold transition-all duration-300 hover:scale-110 px-5 py-2.5 rounded-full hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 border border-transparent hover:border-gray-200">Login</Link>
