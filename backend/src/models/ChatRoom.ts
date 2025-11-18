@@ -1,13 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IChatRoom extends Document {
-  referralRequestId: mongoose.Types.ObjectId;
-  participants: Array<{
-    userId: mongoose.Types.ObjectId;
-    role: 'seeker' | 'referrer';
-  }>;
-  anonymous: boolean;
-  messages: Array<{
+  referralRequestId?: mongoose.Types.ObjectId;
+  participants: mongoose.Types.ObjectId[];
+  lastMessage?: string;
+  lastMessageAt?: Date;
+  anonymous?: boolean;
+  messages?: Array<{
     senderRole: 'seeker' | 'referrer' | 'system';
     text: string;
     createdAt: Date;
@@ -18,21 +17,15 @@ export interface IChatRoom extends Document {
 const ChatRoomSchema = new Schema<IChatRoom>({
   referralRequestId: {
     type: Schema.Types.ObjectId,
-    ref: 'Referral',
-    required: true
+    ref: 'ReferralRequest'
   },
   participants: [{
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    role: {
-      type: String,
-      enum: ['seeker', 'referrer'],
-      required: true
-    }
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }],
+  lastMessage: String,
+  lastMessageAt: Date,
   anonymous: {
     type: Boolean,
     default: true

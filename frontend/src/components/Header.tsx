@@ -24,6 +24,7 @@ const NavLinks = ({ className, isLoggedIn, userRole, showResumeDropdown, setShow
         <>
           <Link to="/seeker/dashboard" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-purple hover:to-brand-magenta font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">Dashboard</Link>
           <Link to="/jobs" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-magenta hover:to-brand-teal font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">Jobs</Link>
+          <Link to="/my-requests" className="px-4 py-2 rounded-full text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-brand-teal hover:to-brand-purple font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg">My Requests</Link>
           <div className="relative">
             <button
               onClick={() => setShowResumeDropdown?.(!showResumeDropdown)}

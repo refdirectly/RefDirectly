@@ -39,6 +39,8 @@ import SeekerChatPage from './pages/SeekerChatPage';
 import ReferrerChatPage from './pages/ReferrerChatPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ATSChecker from './pages/ATSChecker';
+import FindReferrer from './pages/FindReferrer';
+import MyReferralRequests from './pages/MyReferralRequests';
 import Chatbot from './components/Chatbot';
 
 function LandingPage() {
@@ -93,6 +95,8 @@ function App() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/resume-builder" element={<ResumeBuilder />} />
         <Route path="/ats-checker" element={<ATSChecker />} />
+        <Route path="/find-referrer" element={<FindReferrer />} />
+        <Route path="/my-requests" element={<MyReferralRequests />} />
         
         {/* Referrer Routes */}
         <Route path="/referrer/join" element={<BecomeReferrerPage />} />
