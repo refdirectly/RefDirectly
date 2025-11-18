@@ -83,7 +83,7 @@ function App() {
         <Route path="/jobs/:jobId" element={<CompanyPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
         <Route path="/referrers" element={<ReferrersPage />} />
-        <Route path="/referrers/find" element={<FindReferrerPage />} />
+
         <Route path="/ai-apply" element={<AIApplyPage />} />
         <Route path="/seeker/ai-apply" element={<AIApplyNewPage />} />
         <Route path="/seeker/ai-search" element={<AIJobSearchPage />} />
