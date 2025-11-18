@@ -14,7 +14,7 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import AboutPage from './pages/AboutPage';
 import TestimonialsPage from './pages/TestimonialsPage';
 import BecomeReferrerPage from './pages/BecomeReferrerPage';
-
+import FindReferrerPage from './pages/FindReferrerPage';
 import JobsPage from './pages/JobsPage';
 import ReferrersPage from './pages/ReferrersPage';
 import AIApplyPage from './pages/AIApplyPage';
@@ -39,7 +39,6 @@ import SeekerChatPage from './pages/SeekerChatPage';
 import ReferrerChatPage from './pages/ReferrerChatPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ATSChecker from './pages/ATSChecker';
-
 import Chatbot from './components/Chatbot';
 
 function LandingPage() {
@@ -83,7 +82,7 @@ function App() {
         <Route path="/jobs/:jobId" element={<CompanyPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
         <Route path="/referrers" element={<ReferrersPage />} />
-
+        <Route path="/referrers/find" element={<FindReferrerPage />} />
         <Route path="/ai-apply" element={<AIApplyPage />} />
         <Route path="/seeker/ai-apply" element={<AIApplyNewPage />} />
         <Route path="/seeker/ai-search" element={<AIJobSearchPage />} />
@@ -94,7 +93,6 @@ function App() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/resume-builder" element={<ResumeBuilder />} />
         <Route path="/ats-checker" element={<ATSChecker />} />
-
         
         {/* Referrer Routes */}
         <Route path="/referrer/join" element={<BecomeReferrerPage />} />
@@ -117,6 +115,7 @@ function App() {
         <Route path="/referrer-requests" element={<ReferrerRequestsPage />} />
         <Route path="/referrer-earnings" element={<ReferrerEarningsPage />} />
         <Route path="/become-referrer" element={<BecomeReferrerPage />} />
+        <Route path="/find-referrer" element={<FindReferrerPage />} />
         <Route path="/company/:companyId" element={<CompanyPage />} />
       </Routes>
     </BrowserRouter>

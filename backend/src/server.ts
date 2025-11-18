@@ -25,7 +25,6 @@ import escrowRoutes from './routes/escrow';
 import chatRoutes from './routes/chat';
 import aiResumeRoutes from './routes/aiResume';
 import notificationRoutes from './routes/notifications';
-import referralRequestRoutes from './routes/referralRequests';
 
 dotenv.config();
 
@@ -92,7 +91,6 @@ app.use('/api/escrow', escrowRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/ai-resume', aiResumeRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/referral-requests', referralRequestRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

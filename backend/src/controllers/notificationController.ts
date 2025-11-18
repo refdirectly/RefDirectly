@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import Notification from '../models/Notification';
-import ReferralRequest from '../models/ReferralRequest';
-import ChatRoom from '../models/ChatRoom';
 
 export const getNotifications = async (req: Request, res: Response) => {
   try {
@@ -54,43 +52,12 @@ export const acceptNotification = async (req: Request, res: Response) => {
       return res.status(409).json({ success: false, error: 'Another referrer already accepted this request' });
     }
 
-    const referralRequest = await ReferralRequest.findOneAndUpdate(
-      { _id: notification.jobRequestId, status: 'pending' },
-      { 
-        status: 'accepted',
-        acceptedBy: userId,
-        acceptedAt: new Date()
-      },
-      { new: true }
-    );
-
-    if (referralRequest) {
-      const chatRoom = new ChatRoom({
-        participants: [referralRequest.seekerId, userId],
-        lastMessage: 'Referral request accepted',
-        lastMessageAt: new Date()
-      });
-      await chatRoom.save();
-
-      await ReferralRequest.findByIdAndUpdate(referralRequest._id, { chatRoomId: chatRoom._id });
-
-      await Notification.create({
-        userId: referralRequest.seekerId,
-        type: 'referral_accepted',
-        title: 'Referral Request Accepted',
-        message: `A referrer has accepted your request for ${referralRequest.role} at ${referralRequest.company}`,
-        status: 'completed',
-        jobRequestId: notification.jobRequestId,
-        metadata: { chatRoomId: chatRoom._id }
-      });
-    }
-
     await Notification.updateMany(
       { jobRequestId: notification.jobRequestId, _id: { $ne: notificationId }, status: 'waiting' },
       { status: 'rejected' }
     );
 
-    res.json({ success: true, notification: result, chatRoomId: referralRequest?.chatRoomId });
+    res.json({ success: true, notification: result });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

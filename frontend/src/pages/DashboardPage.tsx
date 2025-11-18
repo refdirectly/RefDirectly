@@ -239,13 +239,13 @@ const DashboardPage: React.FC = () => {
                 ) : (
                   <div className="text-center py-12">
                     <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg mb-2">No referral requests yet</p>
-                    <p className="text-gray-400 text-sm mb-6">Browse jobs and click "Request Referral" to get started</p>
+                    <p className="text-gray-500 text-lg mb-2">No referral requests found</p>
+                    <p className="text-gray-400 text-sm mb-6">Check browser console for debug info</p>
                     <button
-                      onClick={() => navigate('/jobs')}
+                      onClick={() => navigate('/find-referrer')}
                       className="bg-gradient-primary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
                     >
-                      Browse Jobs
+                      Find Referrer
                     </button>
                   </div>
                 )}
@@ -303,6 +303,15 @@ const DashboardPage: React.FC = () => {
               >
                 <h2 className="font-display text-2xl font-bold mb-4">Quick Actions</h2>
                 <div className="space-y-3">
+                  <button
+                    onClick={() => navigate('/find-referrer')}
+                    className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-4 text-left transition-all duration-200 hover:scale-105"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="h-5 w-5" />
+                      <span className="font-semibold">Find Referrer</span>
+                    </div>
+                  </button>
                   <button
                     onClick={() => navigate('/jobs')}
                     className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-4 text-left transition-all duration-200 hover:scale-105"
