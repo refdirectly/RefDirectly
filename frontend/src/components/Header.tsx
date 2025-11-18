@@ -121,6 +121,40 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleAcceptNotification = async (notificationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/notifications/${notificationId}/accept`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Referral request accepted!');
+        fetchNotifications();
+      } else {
+        alert(data.error || 'Failed to accept');
+      }
+    } catch (error) {
+      console.error('Failed to accept:', error);
+    }
+  };
+
+  const handleRejectNotification = async (notificationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      await fetch(`${API_URL}/api/notifications/${notificationId}/reject`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Failed to reject:', error);
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -211,6 +245,22 @@ const Header: React.FC = () => {
                                     <p className="text-sm font-semibold text-gray-900">{notif.title}</p>
                                     <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
                                     <p className="text-xs text-gray-400 mt-1">{timeAgo}</p>
+                                    {notif.status === 'waiting' && notif.type === 'referral_request' && (
+                                      <div className="flex gap-2 mt-2">
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); handleAcceptNotification(notif._id); }}
+                                          className="text-xs bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-600"
+                                        >
+                                          Accept
+                                        </button>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); handleRejectNotification(notif._id); }}
+                                          className="text-xs bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600"
+                                        >
+                                          Reject
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                   {!notif.read && <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>}
                                 </div>
