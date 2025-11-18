@@ -5,9 +5,15 @@ export interface IReferralRequest extends Document {
   company: string;
   role: string;
   skills: string[];
-  description: string;
+  description?: string;
+  message?: string;
+  seekerProfile?: {
+    name: string;
+    email: string;
+  };
   resumeUrl?: string;
-  reward: number;
+  reward?: number;
+  amount?: number;
   status: 'pending' | 'accepted' | 'in_progress' | 'referred' | 'completed' | 'cancelled';
   createdAt: Date;
   acceptedBy?: mongoose.Types.ObjectId;
@@ -32,14 +38,19 @@ const ReferralRequestSchema = new Schema<IReferralRequest>({
     required: true
   },
   skills: [String],
-  description: {
-    type: String,
-    required: true
+  description: String,
+  message: String,
+  seekerProfile: {
+    name: String,
+    email: String
   },
   resumeUrl: String,
   reward: {
     type: Number,
-    required: true,
+    min: 0
+  },
+  amount: {
+    type: Number,
     min: 0
   },
   status: {

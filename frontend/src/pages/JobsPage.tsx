@@ -109,6 +109,25 @@ const JobsPage: React.FC = () => {
         const result = await response.json();
         
         const jobsData = result.jobs || [];
+        const getReferralFee = (title: string, company: string) => {
+          const titleLower = title.toLowerCase();
+          const companyLower = company.toLowerCase();
+          
+          // Tier 1 companies
+          const tier1Companies = ['google', 'microsoft', 'apple', 'amazon', 'meta', 'facebook', 'netflix', 'tesla', 'nvidia', 'salesforce', 'adobe', 'uber', 'airbnb', 'stripe', 'spotify', 'twitter', 'linkedin', 'dropbox', 'slack', 'zoom', 'palantir', 'snowflake'];
+          const isTier1 = tier1Companies.some(t1 => companyLower.includes(t1));
+          
+          if (isTier1) {
+            return 399; // Tier 1 companies
+          } else if (titleLower.includes('senior') || titleLower.includes('lead') || titleLower.includes('principal') || titleLower.includes('staff') || titleLower.includes('architect')) {
+            return 299; // Senior level
+          } else if (titleLower.includes('junior') || titleLower.includes('intern') || titleLower.includes('entry') || titleLower.includes('associate') || titleLower.includes('trainee')) {
+            return 99; // Junior level
+          } else {
+            return 199; // Mid level
+          }
+        };
+
         const formattedJobs = jobsData.map((job: any) => ({
           _id: job.job_id,
           title: job.job_title,
@@ -119,7 +138,7 @@ const JobsPage: React.FC = () => {
           salary: job.job_salary || 'Competitive',
           description: (job.job_description || '').substring(0, 200) + '...',
           skills: job.job_required_skills || [],
-          referralReward: Math.floor(Math.random() * 400) + 100,
+          referralReward: getReferralFee(job.job_title || '', job.employer_name || ''),
           createdAt: job.job_posted_at_datetime_utc || new Date().toISOString()
         }));
         
@@ -341,7 +360,7 @@ const JobsPage: React.FC = () => {
                                 );
                               }
                               
-                              return (job as any).isOrgPosting ? (
+                              return (
                                 <button
                                   onClick={() => {
                                     setSelectedJob(job);
@@ -350,10 +369,6 @@ const JobsPage: React.FC = () => {
                                   className="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105"
                                 >
                                   Request Referral
-                                </button>
-                              ) : (
-                                <button className="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105">
-                                  Find Referrer
                                 </button>
                               );
                             })()}
