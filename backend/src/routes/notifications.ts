@@ -1,27 +1,11 @@
 import express from 'express';
-import { authenticateJWT } from '../middleware/auth';
-import {
-  getNotifications,
-  markAsRead,
-  markAllAsRead,
-  deleteNotification,
-  getUnreadCount,
-  createTestNotification
-} from '../controllers/notificationController';
-import {
-  testSeekerNotifications,
-  testReferrerNotifications
-} from '../controllers/testNotificationController';
+import { getNotifications, markAsRead, markAllAsRead } from '../controllers/notificationController';
+import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
 
-router.get('/', authenticateJWT, getNotifications);
-router.get('/unread-count', authenticateJWT, getUnreadCount);
-router.post('/test', authenticateJWT, createTestNotification);
-router.post('/test-seeker', authenticateJWT, testSeekerNotifications);
-router.post('/test-referrer', authenticateJWT, testReferrerNotifications);
-router.patch('/:notificationId/read', authenticateJWT, markAsRead);
-router.patch('/mark-all-read', authenticateJWT, markAllAsRead);
-router.delete('/:notificationId', authenticateJWT, deleteNotification);
+router.get('/', authenticateToken, getNotifications);
+router.patch('/:notificationId/read', authenticateToken, markAsRead);
+router.patch('/read-all', authenticateToken, markAllAsRead);
 
 export default router;

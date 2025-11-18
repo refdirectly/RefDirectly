@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, User, LogOut, LayoutDashboard, Wallet, Briefcase, FileText, ChevronDown, Bell } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Wallet, Briefcase, FileText, ChevronDown, Bell, CheckCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Logo = () => (
@@ -78,8 +78,48 @@ const Header: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showResumeDropdown, setShowResumeDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/notifications`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.unreadCount);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      await fetch(`${API_URL}/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -141,45 +181,43 @@ const Header: React.FC = () => {
                         <h3 className="text-white font-bold text-lg">Notifications</h3>
                       </div>
                       <div className="max-h-96 overflow-y-auto">
-                        <div className="p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer">
-                          <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                              <Briefcase className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold text-gray-900">New job match found!</p>
-                              <p className="text-xs text-gray-600 mt-1">Senior Developer at Google matches your profile</p>
-                              <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
-                            </div>
-                            <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>
+                        {notifications.length === 0 ? (
+                          <div className="p-8 text-center text-gray-500">
+                            <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                            <p className="text-sm">No notifications yet</p>
                           </div>
-                        </div>
-                        <div className="p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer">
-                          <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
-                              <Wallet className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold text-gray-900">Payment received</p>
-                              <p className="text-xs text-gray-600 mt-1">$50 referral bonus credited to your wallet</p>
-                              <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
-                            </div>
-                            <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0 mt-2"></div>
-                          </div>
-                        </div>
-                        <div className="p-3 hover:bg-gray-50 transition-colors cursor-pointer">
-                          <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold text-gray-900">Application update</p>
-                              <p className="text-xs text-gray-600 mt-1">Your application for Meta was viewed</p>
-                              <p className="text-xs text-gray-400 mt-1">1 day ago</p>
-                            </div>
-                            <div className="h-2 w-2 rounded-full bg-purple-500 flex-shrink-0 mt-2"></div>
-                          </div>
-                        </div>
+                        ) : (
+                          notifications.map((notif) => {
+                            const iconMap: any = {
+                              job_match: { icon: Briefcase, color: 'from-blue-500 to-cyan-500' },
+                              payment: { icon: Wallet, color: 'from-green-500 to-emerald-500' },
+                              application_update: { icon: FileText, color: 'from-purple-500 to-pink-500' },
+                              referral_request: { icon: User, color: 'from-orange-500 to-red-500' },
+                              referral_accepted: { icon: CheckCircle, color: 'from-green-500 to-teal-500' }
+                            };
+                            const { icon: Icon, color } = iconMap[notif.type] || iconMap.job_match;
+                            const timeAgo = new Date(notif.createdAt).toLocaleString();
+                            return (
+                              <div
+                                key={notif._id}
+                                onClick={() => markAsRead(notif._id)}
+                                className={`p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer ${!notif.read ? 'bg-blue-50/50' : ''}`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className={`h-10 w-10 rounded-full bg-gradient-to-r ${color} flex items-center justify-center flex-shrink-0`}>
+                                    <Icon className="h-5 w-5 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-semibold text-gray-900">{notif.title}</p>
+                                    <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
+                                    <p className="text-xs text-gray-400 mt-1">{timeAgo}</p>
+                                  </div>
+                                  {!notif.read && <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
                       <div className="p-3 bg-gray-50 border-t border-gray-200">
                         <button className="text-sm font-semibold text-brand-purple hover:text-brand-magenta transition-colors w-full text-center">
