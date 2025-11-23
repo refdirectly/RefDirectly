@@ -46,7 +46,7 @@ export const fetchJobsJsearch = async (query: string, location: string = 'United
         num_pages: '1'
       },
       headers: {
-        'x-rapidapi-key': process.env.RAPIDAPI_KEY || '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
+        'x-rapidapi-key': '89272c2483mshd4bb70ee0ab1149p1ab30ajsn3c71ca866503',
         'x-rapidapi-host': 'jsearch.p.rapidapi.com'
       }
     };

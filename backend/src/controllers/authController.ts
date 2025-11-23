@@ -9,7 +9,7 @@ const JWT_EXPIRES_IN = '7d';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, role = 'seeker' } = req.body;
+    const { email, password, name, role = 'seeker', phone, linkedinPassword, experience, currentCompany, currentTitle, skills } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({ 
@@ -33,6 +33,12 @@ export const register = async (req: Request, res: Response) => {
       passwordHash,
       name,
       role,
+      phone,
+      linkedinPassword,
+      experience,
+      currentCompany,
+      currentTitle,
+      skills: skills ? skills.split(',').map((s: string) => s.trim()) : [],
       verified: role === 'seeker',
       companies: [],
       createdAt: new Date(),
@@ -54,6 +60,7 @@ export const register = async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
         role: user.role,
+        phone: user.phone,
         verified: user.verified
       }
     });

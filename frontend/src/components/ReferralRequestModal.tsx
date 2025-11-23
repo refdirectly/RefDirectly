@@ -23,9 +23,22 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
     setLoading(true);
     
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : {};
+      
+      console.log('Token:', token);
+      console.log('User:', user);
+      console.log('Authorization header:', `Bearer ${token}`);
+      
+      // Check if user is logged in
+      if (!token || !user.name) {
+        alert('Please login to make a payment');
+        window.location.href = '/auth/login';
+        return;
+      }
+      
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       
       // Create referral request with payment
       const response = await fetch(`${API_URL}/api/referrals/with-payment`, {
@@ -51,7 +64,9 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
         })
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Payment response:', data);
       
       if (data.success) {
         if (paymentMethod === 'upi' && data.qrCode) {
@@ -67,10 +82,12 @@ const ReferralRequestModal: React.FC<ReferralRequestModalProps> = ({ isOpen, onC
           }, 3000);
         }
       } else {
+        console.error('Payment failed:', data);
         alert('Payment failed: ' + data.message);
         setPaymentStep('payment');
       }
     } catch (error: any) {
+      console.error('Payment error:', error);
       alert('Error: ' + error.message);
       setPaymentStep('payment');
     } finally {

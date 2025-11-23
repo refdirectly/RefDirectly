@@ -163,6 +163,8 @@ export function createReferralHandler(io: Server, socket: Socket) {
     senderRole: 'seeker' | 'referrer';
   }) => {
     try {
+      console.log(`📨 Received chat_message for room ${data.roomId}:`, data.text.substring(0, 50));
+      
       const message = {
         senderRole: data.senderRole,
         text: data.text,
@@ -174,13 +176,20 @@ export function createReferralHandler(io: Server, socket: Socket) {
       if (chatRoom) {
         chatRoom.messages.push(message as any);
         await chatRoom.save();
+        console.log(`💾 Message saved to database`);
       }
 
-      // Broadcast to room participants
+      // Broadcast to ALL participants in the room (including sender)
+      console.log(`📡 Broadcasting to room ${data.roomId}`);
       io.to(data.roomId).emit('incoming_chat_message', message);
+      
+      // Also emit to sender's socket directly as backup
+      socket.emit('incoming_chat_message', message);
+      
+      console.log(`✅ Message broadcast complete`);
 
     } catch (error) {
-      console.error('Error sending chat message:', error);
+      console.error('❌ Error sending chat message:', error);
       socket.emit('error', { message: 'Failed to send message' });
     }
   });

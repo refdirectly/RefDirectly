@@ -9,6 +9,8 @@ const ATSChecker: React.FC = () => {
   const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState<string>('');
+  const [retryCount, setRetryCount] = useState(0);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
@@ -18,13 +20,15 @@ const ATSChecker: React.FC = () => {
     }
   };
 
-  const analyzeResume = async () => {
+  const analyzeResume = async (isRetry = false) => {
     if (!file) {
-      alert('Please upload a PDF resume');
+      setError('Please upload a PDF resume');
       return;
     }
     
     setAnalyzing(true);
+    setError('');
+    
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const formData = new FormData();
@@ -33,22 +37,48 @@ const ATSChecker: React.FC = () => {
         formData.append('jobDescription', jobDescription);
       }
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const response = await fetch(`${API_URL}/api/ai-resume/analyze-ats`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      
       const data = await response.json();
       if (data.success) {
         setResults(data);
+        setRetryCount(0);
       } else {
-        alert(data.error || 'Failed to analyze resume. Please ensure your PDF is readable and try again.');
+        throw new Error(data.error || 'Analysis failed');
       }
     } catch (error: any) {
       console.error('Analysis error:', error);
-      alert('Network error or service unavailable. Please check your connection and try again.');
+      if (error.name === 'AbortError') {
+        setError('Request timeout. Please try again.');
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        setError('Network error. Check your connection and try again.');
+      } else {
+        setError(error.message || 'Analysis failed. Please try again.');
+      }
+      
+      if (!isRetry && retryCount < 2) {
+        setRetryCount(prev => prev + 1);
+      }
     } finally {
       setAnalyzing(false);
     }
+  };
+  
+  const handleRetry = () => {
+    analyzeResume(true);
   };
 
   const getScoreColor = (score: number) => {
@@ -74,44 +104,44 @@ const ATSChecker: React.FC = () => {
             className="max-w-6xl mx-auto"
           >
             {/* Hero Section */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-12 lg:mb-16">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full mb-6 shadow-xl"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-full mb-4 md:mb-6 shadow-xl text-xs md:text-sm"
               >
-                <Sparkles className="h-5 w-5 animate-pulse" />
-                <span className="text-sm font-bold tracking-wide">AI-POWERED ATS ANALYSIS</span>
+                <Sparkles className="h-4 w-4 md:h-5 md:w-5 animate-pulse" />
+                <span className="font-bold tracking-wide">PROFESSIONAL ATS ANALYSIS</span>
               </motion.div>
-              <h1 className="font-display text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight px-4">
                 ATS Score Checker
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mt-2">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mt-1 md:mt-2">
                   Beat the Bots
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-                Professional ATS compatibility checker powered by AI. Get detailed analysis of formatting, keywords, sections, and job match in seconds.
+              <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto mb-8 md:mb-12 px-4 leading-relaxed">
+                Professional ATS compatibility checker with instant analysis. Get detailed insights on formatting, keywords, sections, and optimization tips in seconds.
               </p>
 
               {/* Feature Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto px-4">
                 {[
-                  { icon: Sparkles, title: 'AI Analysis', desc: 'Powered by Gemini', gradient: 'from-blue-600 to-cyan-600', bg: 'from-blue-50 to-blue-100' },
-                  { icon: TrendingUp, title: 'ATS Score', desc: 'Instant feedback', gradient: 'from-purple-600 to-pink-600', bg: 'from-purple-50 to-purple-100' },
-                  { icon: Award, title: 'Optimization', desc: 'Actionable tips', gradient: 'from-pink-600 to-red-600', bg: 'from-pink-50 to-pink-100' }
+                  { icon: Sparkles, title: 'Smart Analysis', desc: 'Advanced local processing', gradient: 'from-blue-600 to-cyan-600', bg: 'from-blue-50 to-blue-100' },
+                  { icon: TrendingUp, title: 'ATS Score', desc: 'Instant detailed feedback', gradient: 'from-purple-600 to-pink-600', bg: 'from-purple-50 to-purple-100' },
+                  { icon: Award, title: 'Optimization', desc: 'Professional actionable tips', gradient: 'from-pink-600 to-red-600', bg: 'from-pink-50 to-pink-100' }
                 ].map((feature, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * i }}
-                    className={`bg-gradient-to-br ${feature.bg} rounded-3xl p-8 border-2 border-white shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1`}
+                    className={`bg-gradient-to-br ${feature.bg} rounded-2xl md:rounded-3xl p-6 md:p-8 border-2 border-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group`}
                   >
-                    <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 mx-auto shadow-lg`}>
-                      <feature.icon className="h-8 w-8 text-white" />
+                    <div className={`h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-3 md:mb-4 mx-auto shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <feature.icon className="h-6 w-6 md:h-8 md:w-8 text-white" />
                     </div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-sm text-gray-600">{feature.desc}</p>
+                    <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2">{feature.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{feature.desc}</p>
                   </motion.div>
                 ))}
               </div>
@@ -123,16 +153,16 @@ const ATSChecker: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 mb-8 border-2 border-white"
+                className="bg-white/90 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 lg:p-10 mb-6 md:mb-8 border border-gray-200 mx-4 md:mx-0"
               >
-                <div className="mb-8">
-                  <label className="block text-lg font-bold text-gray-900 mb-4">Job Description (Optional)</label>
+                <div className="mb-6 md:mb-8">
+                  <label className="block text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4">Job Description (Optional)</label>
                   <textarea
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
-                    placeholder="Paste the job description to get role-specific analysis..."
-                    rows={6}
-                    className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm"
+                    placeholder="Paste the job description here to get role-specific analysis and keyword matching..."
+                    rows={4}
+                    className="w-full px-4 md:px-5 py-3 md:py-4 border-2 border-gray-200 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm md:text-base resize-none"
                   />
                 </div>
 
@@ -146,35 +176,55 @@ const ATSChecker: React.FC = () => {
                   />
                   <label
                     htmlFor="resume-upload"
-                    className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-12 py-6 rounded-2xl font-bold text-lg cursor-pointer hover:shadow-2xl transition-all hover:scale-105"
+                    className="inline-flex items-center gap-2 md:gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-6 py-3 md:px-12 md:py-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-lg cursor-pointer hover:shadow-2xl transition-all hover:scale-105 w-full sm:w-auto justify-center"
                   >
-                    <Upload className="h-6 w-6" />
-                    Upload PDF Resume
+                    <Upload className="h-5 w-5 md:h-6 md:w-6" />
+                    <span className="whitespace-nowrap">Upload PDF Resume</span>
                   </label>
                   {file && (
-                    <div className="mt-6 text-gray-700 font-semibold">
-                      Selected: {file.name}
+                    <div className="mt-4 md:mt-6 p-3 md:p-4 bg-green-50 border border-green-200 rounded-xl">
+                      <div className="flex items-center justify-center gap-2 text-green-700">
+                        <CheckCircle className="h-5 w-5 flex-shrink-0" />
+                        <span className="font-semibold text-sm md:text-base truncate">{file.name}</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {error && (
+                    <div className="mt-4 md:mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                      <div className="flex items-center gap-2 text-red-700 mb-3">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                        <span className="font-semibold text-sm md:text-base">{error}</span>
+                      </div>
+                      {retryCount < 2 && (
+                        <button
+                          onClick={handleRetry}
+                          className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
+                        >
+                          Retry ({2 - retryCount} attempts left)
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {file && (
-                  <div className="mt-8 text-center">
+                  <div className="mt-6 md:mt-8 text-center">
                     <button
                       onClick={analyzeResume}
                       disabled={analyzing}
-                      className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 md:gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 md:px-12 md:py-5 rounded-xl md:rounded-2xl font-bold text-sm md:text-lg hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto justify-center"
                     >
-                      <Sparkles className={`h-6 w-6 ${analyzing ? 'animate-spin' : ''}`} />
-                      {analyzing ? 'Analyzing Resume with AI...' : 'Analyze with AI'}
+                      <Sparkles className={`h-5 w-5 md:h-6 md:w-6 ${analyzing ? 'animate-spin' : ''}`} />
+                      <span className="whitespace-nowrap">{analyzing ? 'Analyzing Resume...' : 'Analyze Resume'}</span>
                     </button>
                     {analyzing && (
-                      <div className="mt-6">
-                        <div className="max-w-md mx-auto">
-                          <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
-                            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 h-3 rounded-full animate-pulse" style={{width: '100%'}}></div>
+                      <div className="mt-4 md:mt-6">
+                        <div className="max-w-sm md:max-w-md mx-auto">
+                          <div className="w-full bg-gray-200 rounded-full h-2 md:h-3 mb-3 overflow-hidden">
+                            <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 h-2 md:h-3 rounded-full animate-pulse" style={{width: '100%'}}></div>
                           </div>
-                          <p className="text-gray-600 text-sm font-semibold">Performing comprehensive ATS analysis...</p>
+                          <p className="text-gray-600 text-xs md:text-sm font-semibold">Performing comprehensive ATS analysis...</p>
                           <p className="text-xs text-gray-500 mt-1">Analyzing formatting, keywords, sections, readability & impact</p>
                         </div>
                       </div>
@@ -194,12 +244,12 @@ const ATSChecker: React.FC = () => {
                   className="space-y-8"
                 >
                   {/* Overall Summary Card */}
-                  <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl shadow-2xl p-10 border-2 border-white">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Analysis Summary</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-                        <div className="text-4xl font-bold text-blue-600 mb-2">{results.score}</div>
-                        <div className="text-sm text-gray-600 font-semibold">Overall ATS Score</div>
+                  <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 lg:p-10 border border-gray-200 mx-4 md:mx-0">
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6 text-center">Analysis Summary</h2>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+                      <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg text-center hover:shadow-xl transition-shadow">
+                        <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-600 mb-1 md:mb-2">{results.score}</div>
+                        <div className="text-xs md:text-sm text-gray-600 font-semibold">Overall ATS Score</div>
                       </div>
                       {results.formatting && (
                         <div className="bg-white rounded-2xl p-6 shadow-lg text-center">

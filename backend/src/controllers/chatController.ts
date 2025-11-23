@@ -69,3 +69,33 @@ export const getUserChats = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const sendMessage = async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params;
+    const { text, senderRole } = req.body;
+
+    console.log(`💾 Saving message to room ${roomId}`);
+
+    const chatRoom = await ChatRoom.findById(roomId);
+    if (!chatRoom) {
+      return res.status(404).json({ error: 'Chat room not found' });
+    }
+
+    const message = {
+      senderRole,
+      text,
+      createdAt: new Date(),
+      read: false
+    };
+
+    chatRoom.messages.push(message as any);
+    await chatRoom.save();
+
+    console.log(`✅ Message saved successfully`);
+    res.json({ success: true, message });
+  } catch (error) {
+    console.error('❌ Error saving message:', error);
+    res.status(500).json({ error: 'Failed to save message' });
+  }
+};

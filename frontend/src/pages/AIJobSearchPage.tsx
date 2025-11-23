@@ -22,12 +22,36 @@ const AIJobSearchPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [aiQuery, setAiQuery] = useState('');
+  const [applyingJobs, setApplyingJobs] = useState<Set<string>>(new Set());
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
+  const [botStatus, setBotStatus] = useState<string>('');
   const [aiSuggestions] = useState([
     'Senior Software Engineer with React experience',
     'Product Manager in tech startups',
     'Data Scientist with Python and ML',
     'Full Stack Developer remote positions'
   ]);
+
+  useEffect(() => {
+    loadAppliedJobs();
+  }, []);
+
+  const loadAppliedJobs = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/applications/seeker`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const applications = await response.json();
+      const appliedIds = new Set(applications.map((app: any) => app.externalJobId).filter(Boolean));
+      setAppliedJobs(appliedIds);
+    } catch (error) {
+      console.error('Failed to load applied jobs:', error);
+    }
+  };
 
   useEffect(() => {
     fetchInitialJobs();
@@ -95,6 +119,112 @@ const AIJobSearchPage: React.FC = () => {
     if (days < 7) return `${days}d ago`;
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
     return `${Math.floor(days / 30)}mo ago`;
+  };
+
+  const handleAIApply = async (job: Job) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to apply');
+      return;
+    }
+
+    setApplyingJobs(prev => new Set(prev).add(job.job_id));
+    
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/applications`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          externalJobId: job.job_id,
+          jobTitle: job.job_title,
+          company: job.employer_name,
+          status: 'applied'
+        })
+      });
+
+      if (response.ok) {
+        setAppliedJobs(prev => new Set(prev).add(job.job_id));
+      }
+    } catch (error) {
+      console.error('Failed to apply:', error);
+    } finally {
+      setApplyingJobs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(job.job_id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleAutoApplyAll = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to apply');
+      return;
+    }
+
+    const unappliedJobs = jobs.filter(job => !appliedJobs.has(job.job_id)).slice(0, 10);
+    
+    if (unappliedJobs.length === 0) {
+      alert('ℹ️ All jobs already applied!\n\nSearch for different jobs (e.g., "Product Manager", "Data Scientist") to find new opportunities.');
+      return;
+    }
+
+    setLoading(true);
+    setBotStatus('🤖 AI Bot initializing...');
+    
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      console.log('Applying to jobs:', unappliedJobs.length);
+      setBotStatus(`🔍 Searching ${unappliedJobs.length} jobs...`);
+      
+      const minimalJobs = unappliedJobs.map(job => ({
+        job_id: job.job_id,
+        job_title: job.job_title,
+        employer_name: job.employer_name
+      }));
+      
+      const response = await fetch(`${API_URL}/api/applications/bulk`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ jobs: minimalJobs, autoSubmit: true, realApply: true })
+      });
+
+      setBotStatus('📝 AI Bot applying...');
+      console.log('Response status:', response.status);
+      const result = await response.json();
+      console.log('Result:', result);
+      setBotStatus('✅ Complete!');
+      
+      if (result.success) {
+        if (result.applied === 0) {
+          alert(`ℹ️ All jobs already applied!\n\nYou've already applied to these jobs. Search for new jobs to apply.`);
+        } else {
+          result.results.forEach((r: any) => {
+            if (r.success) {
+              setAppliedJobs(prev => new Set(prev).add(r.jobId));
+            }
+          });
+          alert(`✅ AI Applied to ${result.applied} jobs!\n\n${result.message || 'Applications submitted automatically using AI'}`);
+        }
+      } else {
+        alert(result.error || 'Failed to apply');
+      }
+    } catch (error: any) {
+      console.error('Bulk apply failed:', error);
+      setBotStatus('❌ Failed');
+      alert(`Error: ${error.message || 'Failed to auto-apply. Please try again.'}`);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setBotStatus(''), 3000);
+    }
   };
 
   return (
@@ -181,10 +311,28 @@ const AIJobSearchPage: React.FC = () => {
               ))}
             </div>
 
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {loading ? 'Searching...' : `${jobs.length} AI-Matched Jobs`}
-              </h2>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {loading ? 'Searching...' : `${jobs.length} AI-Matched Jobs`}
+                </h2>
+                {jobs.length > 0 && (
+                  <button
+                    onClick={handleAutoApplyAll}
+                    disabled={loading}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Zap className="h-5 w-5" />
+                    AI Auto-Apply to 10 Jobs
+                  </button>
+                )}
+              </div>
+              {botStatus && (
+                <div className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-3">
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {botStatus}
+                </div>
+              )}
             </div>
 
             {loading ? (
@@ -257,8 +405,21 @@ const AIJobSearchPage: React.FC = () => {
                           </p>
                         )}
                         <div className="mt-4 flex gap-3">
-                          <button className="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105">
-                            AI Apply Now
+                          <button
+                            onClick={() => handleAIApply(job)}
+                            disabled={applyingJobs.has(job.job_id) || appliedJobs.has(job.job_id)}
+                            className="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {applyingJobs.has(job.job_id) ? (
+                              <>
+                                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                AI Applying...
+                              </>
+                            ) : appliedJobs.has(job.job_id) ? (
+                              '✓ AI Applied'
+                            ) : (
+                              'AI Apply Now'
+                            )}
                           </button>
                           <button className="border-2 border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:border-brand-purple hover:text-brand-purple transition-all duration-200">
                             View Details

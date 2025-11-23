@@ -25,6 +25,7 @@ import escrowRoutes from './routes/escrow';
 import chatRoutes from './routes/chat';
 import aiResumeRoutes from './routes/aiResume';
 import notificationRoutes from './routes/notifications';
+import atsRoutes from './routes/ats';
 
 dotenv.config();
 
@@ -67,13 +68,18 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(passport.initialize());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
+// Connect to MongoDB with timeout settings
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000
+})
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -91,6 +97,7 @@ app.use('/api/escrow', escrowRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/ai-resume', aiResumeRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ai-resume', atsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

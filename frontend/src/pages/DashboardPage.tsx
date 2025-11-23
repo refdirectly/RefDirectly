@@ -158,7 +158,10 @@ const DashboardPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:border-brand-purple transition-all duration-300"
+                onClick={() => stat.label === 'AI Applications' && navigate('/applications')}
+                className={`bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:border-brand-purple transition-all duration-300 ${
+                  stat.label === 'AI Applications' ? 'cursor-pointer hover:scale-105' : ''
+                }`}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center`}>
