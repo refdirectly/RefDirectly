@@ -1,44 +1,41 @@
 import crypto from 'crypto';
 import OTP from '../models/OTP';
-import { sendOTPEmail } from './emailService';
+import { sendOTP } from './emailService';
 
 export const generateOTP = (): string => {
   return crypto.randomInt(100000, 999999).toString();
 };
 
-export const createAndSendOTP = async (email: string, type: 'signup' | 'login' | 'reset') => {
-  // Delete any existing OTPs for this email and type
-  await OTP.deleteMany({ email, type });
+export const createAndSendOTP = async (email: string) => {
+  await OTP.deleteMany({ email });
 
   const otp = generateOTP();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   await OTP.create({
     email,
     otp,
-    type,
-    expiresAt,
-    verified: false,
-    attempts: 0
+    attempts: 0,
+    maxAttempts: 3,
+    blocked: false
   });
 
-  await sendOTPEmail(email, otp, type);
+  await sendOTP(email, otp);
 };
 
-export const verifyOTP = async (email: string, otp: string, type: 'signup' | 'login' | 'reset'): Promise<boolean> => {
-  const otpRecord = await OTP.findOne({ email, type, verified: false });
+export const verifyOTP = async (email: string, otp: string): Promise<boolean> => {
+  const otpRecord = await OTP.findOne({ email });
 
   if (!otpRecord) {
-    throw new Error('OTP not found or already verified');
+    throw new Error('OTP not found');
   }
 
-  if (otpRecord.expiresAt < new Date()) {
-    await OTP.deleteOne({ _id: otpRecord._id });
-    throw new Error('OTP has expired');
+  if (otpRecord.blocked) {
+    throw new Error('Too many failed attempts. Please request a new OTP');
   }
 
-  if (otpRecord.attempts >= 5) {
-    await OTP.deleteOne({ _id: otpRecord._id });
+  if (otpRecord.attempts >= otpRecord.maxAttempts) {
+    otpRecord.blocked = true;
+    await otpRecord.save();
     throw new Error('Too many failed attempts. Please request a new OTP');
   }
 
@@ -48,7 +45,6 @@ export const verifyOTP = async (email: string, otp: string, type: 'signup' | 'lo
     throw new Error('Invalid OTP');
   }
 
-  otpRecord.verified = true;
-  await otpRecord.save();
+  await OTP.deleteOne({ _id: otpRecord._id });
   return true;
 };
