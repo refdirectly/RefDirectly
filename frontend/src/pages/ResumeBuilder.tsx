@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Plus, Save, Sparkles, Wand2, User, Briefcase, GraduationCap, Code } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import html2pdf from 'html2pdf.js';
 
 const ResumeBuilder: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -128,8 +129,37 @@ const ResumeBuilder: React.FC = () => {
     }
   };
 
-  const handleDownload = () => {
-    alert('Resume download functionality will be implemented with PDF generation');
+  const resumeRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!resumeRef.current) {
+      alert('Please show preview first before downloading');
+      return;
+    }
+
+    if (!formData.fullName) {
+      alert('Please fill in your name before downloading');
+      return;
+    }
+
+    setDownloading(true);
+    try {
+      const element = resumeRef.current;
+      const opt = {
+        margin: 0,
+        filename: `${formData.fullName.replace(/\s+/g, '_')}_Resume.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -610,6 +640,218 @@ const ResumeBuilder: React.FC = () => {
               </div>
             </motion.div>
 
+            {/* Resume Preview */}
+            {showPreview && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-3xl shadow-2xl p-10 mb-8 border-2 border-purple-200"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Resume Preview</h2>
+                  <span className="text-sm text-gray-600 bg-purple-100 px-4 py-2 rounded-full">
+                    Template: {template.charAt(0).toUpperCase() + template.slice(1)}
+                  </span>
+                </div>
+                
+                {/* A4 Paper Preview - ATS Optimized */}
+                <div ref={resumeRef} className="bg-white border-2 border-gray-300 rounded-lg shadow-xl mx-auto" style={{ width: '210mm', minHeight: '297mm', padding: '15mm 20mm', fontFamily: 'Arial, sans-serif' }}>
+                  {/* Header - ATS Optimized */}
+                  <div className={`mb-5 pb-3 ${
+                    template === 'modern' ? 'border-b-2 border-blue-600' :
+                    template === 'executive' ? 'border-b-2 border-gray-800 text-center' :
+                    template === 'corporate' ? 'border-b-2 border-indigo-600' :
+                    template === 'academic' ? 'text-center border-b border-gray-400' :
+                    'border-b-2 border-gray-400'
+                  }`}>
+                    <h1 className="font-bold text-2xl text-gray-900 mb-2 uppercase tracking-wide" style={{ letterSpacing: '0.5px' }}>
+                      {formData.fullName || 'YOUR NAME'}
+                    </h1>
+                    <div className={`text-xs text-gray-700 leading-relaxed ${
+                      template === 'executive' || template === 'academic' ? 'text-center' : ''
+                    }`}>
+                      {formData.email && <span className="mr-3">{formData.email}</span>}
+                      {formData.phone && <span className="mr-3">| {formData.phone}</span>}
+                      {formData.location && <span className="mr-3">| {formData.location}</span>}
+                      {formData.linkedin && <span className="mr-3">| LinkedIn: {formData.linkedin.replace('https://', '').replace('http://', '')}</span>}
+                      {formData.github && <span>| GitHub: {formData.github.replace('https://', '').replace('http://', '')}</span>}
+                    </div>
+                  </div>
+
+                  {/* Summary - ATS Optimized */}
+                  {formData.summary && (
+                    <div className="mb-5">
+                      <h2 className={`font-bold text-base mb-2 uppercase tracking-wide ${
+                        template === 'modern' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' :
+                        template === 'corporate' ? 'text-indigo-600 bg-indigo-50 px-2 py-1' :
+                        template === 'academic' ? 'text-amber-600 border-l-4 border-amber-600 pl-2' :
+                        template === 'executive' ? 'text-gray-900 border-b border-gray-400 pb-1' :
+                        'text-gray-900 border-b-2 border-gray-300 pb-1'
+                      }`}>PROFESSIONAL SUMMARY</h2>
+                      <p className="text-gray-800 text-xs leading-relaxed" style={{ lineHeight: '1.6' }}>{formData.summary}</p>
+                    </div>
+                  )}
+
+                  {/* Experience - ATS Optimized */}
+                  {formData.experience.some(e => e.company || e.position) && (
+                    <div className="mb-5">
+                      <h2 className={`font-bold text-base mb-2 uppercase tracking-wide ${
+                        template === 'modern' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' :
+                        template === 'corporate' ? 'text-indigo-600 bg-indigo-50 px-2 py-1' :
+                        template === 'academic' ? 'text-amber-600 border-l-4 border-amber-600 pl-2' :
+                        template === 'executive' ? 'text-gray-900 border-b border-gray-400 pb-1' :
+                        'text-gray-900 border-b-2 border-gray-300 pb-1'
+                      }`}>PROFESSIONAL EXPERIENCE</h2>
+                      {formData.experience.map((exp, i) => (
+                        (exp.company || exp.position) && (
+                          <div key={i} className="mb-3">
+                            <div className="flex justify-between items-start mb-1">
+                              <div className="flex-1">
+                                <h3 className="font-bold text-sm text-gray-900 uppercase">{exp.position || 'POSITION TITLE'}</h3>
+                                <p className="text-xs text-gray-700 font-semibold">{exp.company || 'Company Name'}</p>
+                              </div>
+                              <span className="text-xs text-gray-600 font-semibold whitespace-nowrap ml-4">{exp.duration}</span>
+                            </div>
+                            {exp.description && (
+                              <div className="text-xs text-gray-800 mt-1.5 leading-relaxed" style={{ lineHeight: '1.5' }}>
+                                {exp.description.split('\n').map((line, idx) => (
+                                  line.trim() && (
+                                    <div key={idx} className="mb-1">
+                                      {line.trim().startsWith('•') || line.trim().startsWith('-') ? line : `• ${line}`}
+                                    </div>
+                                  )
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Education - ATS Optimized */}
+                  {formData.education.some(e => e.school || e.degree) && (
+                    <div className="mb-5">
+                      <h2 className={`font-bold text-base mb-2 uppercase tracking-wide ${
+                        template === 'modern' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' :
+                        template === 'corporate' ? 'text-indigo-600 bg-indigo-50 px-2 py-1' :
+                        template === 'academic' ? 'text-amber-600 border-l-4 border-amber-600 pl-2' :
+                        template === 'executive' ? 'text-gray-900 border-b border-gray-400 pb-1' :
+                        'text-gray-900 border-b-2 border-gray-300 pb-1'
+                      }`}>EDUCATION</h2>
+                      {formData.education.map((edu, i) => (
+                        (edu.school || edu.degree) && (
+                          <div key={i} className="mb-2">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h3 className="font-bold text-sm text-gray-900">{edu.degree || 'Degree'}</h3>
+                                <p className="text-xs text-gray-700">{edu.school || 'School'}</p>
+                              </div>
+                              <div className="text-right text-xs text-gray-600 whitespace-nowrap ml-4">
+                                <p className="font-semibold">{edu.year}</p>
+                                {edu.gpa && <p>GPA: {edu.gpa}</p>}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Skills - ATS Optimized */}
+                  {formData.skills && (
+                    <div className="mb-6">
+                      <h2 className={`font-bold text-lg mb-3 uppercase tracking-wide ${
+                        template === 'modern' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' :
+                        template === 'creative' ? 'text-purple-600' :
+                        template === 'corporate' ? 'text-indigo-600 bg-indigo-50 px-2 py-1' :
+                        template === 'academic' ? 'text-amber-600 border-l-4 border-amber-600 pl-2' :
+                        template === 'executive' ? 'text-gray-900 border-b border-gray-400 pb-1' :
+                        'text-gray-900 border-b-2 border-gray-300 pb-1'
+                      }`}>TECHNICAL SKILLS</h2>
+                      
+                      {/* ATS-Friendly Format: Simple text list */}
+                      <div className="text-sm text-gray-800 leading-relaxed">
+                        {(() => {
+                          const skills = formData.skills.split(',').map(s => s.trim()).filter(s => s);
+                          const categories = {
+                            'Programming Languages': skills.filter(s => 
+                              /\b(JavaScript|TypeScript|Python|Java|C\+\+|C#|Ruby|Go|Rust|PHP|Swift|Kotlin|Scala|R|MATLAB)\b/i.test(s)
+                            ),
+                            'Frameworks & Libraries': skills.filter(s => 
+                              /\b(React|Angular|Vue|Node|Express|Django|Flask|Spring|Laravel|Rails|Next|Nuxt|Svelte|jQuery)\b/i.test(s)
+                            ),
+                            'Databases': skills.filter(s => 
+                              /\b(MongoDB|MySQL|PostgreSQL|Redis|Cassandra|DynamoDB|Oracle|SQL Server|Firebase|Elasticsearch)\b/i.test(s)
+                            ),
+                            'Cloud & DevOps': skills.filter(s => 
+                              /\b(AWS|Azure|GCP|Docker|Kubernetes|Jenkins|GitLab|CircleCI|Terraform|Ansible|Linux)\b/i.test(s)
+                            ),
+                            'Tools & Technologies': skills.filter(s => 
+                              /\b(Git|GitHub|Jira|Confluence|Postman|VS Code|IntelliJ|Figma|Sketch|Photoshop)\b/i.test(s)
+                            )
+                          };
+                          
+                          const uncategorized = skills.filter(skill => 
+                            !Object.values(categories).some(cat => cat.includes(skill))
+                          );
+                          
+                          if (uncategorized.length > 0) {
+                            categories['Other Skills'] = uncategorized;
+                          }
+                          
+                          return Object.entries(categories).map(([category, items]) => 
+                            items.length > 0 && (
+                              <div key={category} className="mb-2">
+                                <span className="font-semibold text-gray-900">{category}:</span>{' '}
+                                <span className="text-gray-700">{items.join(' • ')}</span>
+                              </div>
+                            )
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Certifications - ATS Optimized */}
+                  {formData.certifications && (
+                    <div className="mb-5">
+                      <h2 className={`font-bold text-base mb-2 uppercase tracking-wide ${
+                        template === 'modern' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' :
+                        template === 'corporate' ? 'text-indigo-600 bg-indigo-50 px-2 py-1' :
+                        template === 'academic' ? 'text-amber-600 border-l-4 border-amber-600 pl-2' :
+                        template === 'executive' ? 'text-gray-900 border-b border-gray-400 pb-1' :
+                        'text-gray-900 border-b-2 border-gray-300 pb-1'
+                      }`}>CERTIFICATIONS</h2>
+                      <div className="text-xs text-gray-800 leading-relaxed">
+                        {formData.certifications.split('\n').map((cert, i) => (
+                          cert.trim() && (
+                            <div key={i} className="mb-1">
+                              • {cert.trim()}
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Languages - ATS Optimized */}
+                  {formData.languages && (
+                    <div>
+                      <h2 className={`font-bold text-base mb-2 uppercase tracking-wide ${
+                        template === 'modern' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' :
+                        template === 'corporate' ? 'text-indigo-600 bg-indigo-50 px-2 py-1' :
+                        template === 'academic' ? 'text-amber-600 border-l-4 border-amber-600 pl-2' :
+                        template === 'executive' ? 'text-gray-900 border-b border-gray-400 pb-1' :
+                        'text-gray-900 border-b-2 border-gray-300 pb-1'
+                      }`}>LANGUAGES</h2>
+                      <p className="text-xs text-gray-800">{formData.languages}</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
             {/* Action Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -626,10 +868,11 @@ const ResumeBuilder: React.FC = () => {
               </button>
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-3 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white px-12 py-6 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 w-full sm:w-auto"
+                disabled={downloading || !showPreview}
+                className="flex items-center gap-3 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white px-12 py-6 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="h-6 w-6" />
-                Download PDF
+                {downloading ? 'Generating PDF...' : 'Download PDF'}
               </button>
               <button className="flex items-center gap-3 bg-white border-2 border-purple-600 text-purple-600 px-12 py-6 rounded-2xl font-bold text-lg hover:bg-purple-600 hover:text-white hover:shadow-2xl transition-all hover:scale-105 w-full sm:w-auto">
                 <Save className="h-6 w-6" />

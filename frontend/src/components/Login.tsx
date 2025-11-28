@@ -172,9 +172,9 @@ const Login: React.FC = () => {
                       Remember me
                     </label>
                   </div>
-                  <a href="#" className="text-sm font-semibold text-brand-purple hover:text-brand-magenta transition-colors">
+                  <Link to="/forgot-password" className="text-sm font-semibold text-brand-purple hover:text-brand-magenta transition-colors">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
 
                 <button
@@ -231,7 +231,7 @@ const Login: React.FC = () => {
                 <div className="text-center space-y-3">
                   <p className="text-sm text-gray-600">
                     Don't have an account?{' '}
-                    <Link to="/auth/signup" className="font-semibold text-brand-purple hover:text-brand-magenta transition-colors">
+                    <Link to="/auth/signup/seeker" className="font-semibold text-brand-purple hover:text-brand-magenta transition-colors">
                       Sign up now
                     </Link>
                   </p>

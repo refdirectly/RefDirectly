@@ -75,9 +75,9 @@ export const bulkApply = async (req: AuthRequest, res: Response) => {
     const results = [];
     const errors = [];
 
-    // Real AI bot application
+    // Real AI application service
     if (realApply) {
-      const { productionAIBot } = await import('../services/productionAIApplyBot');
+      const { aiApplicationService } = await import('../services/aiApplicationService');
       
       try {
         // Check MongoDB connection
@@ -86,7 +86,7 @@ export const bulkApply = async (req: AuthRequest, res: Response) => {
           return res.status(503).json({ error: 'Database not connected. Please try again.' });
         }
         
-        await productionAIBot.initialize();
+        await aiApplicationService.initialize();
         
         const user = await User.findById(seekerId).maxTimeMS(5000);
         if (!user) {
@@ -106,57 +106,59 @@ export const bulkApply = async (req: AuthRequest, res: Response) => {
           skills: user.skills
         };
 
-        const botResults = await productionAIBot.bulkApply(jobs, userProfile);
+        // Apply to each job
+        const applicationResults = [];
+        for (const job of jobs.slice(0, 10)) {
+          const jobUrl = job.job_apply_link || job.job_google_link;
+          if (!jobUrl || jobUrl.includes('q-company') || jobUrl.includes('/jobs.html')) {
+            console.log(`Skipping invalid URL for ${job.job_title}`);
+            continue;
+          }
+
+          const result = await aiApplicationService.applyToJob(jobUrl, userProfile);
+          result.jobId = job.job_id;
+          result.jobTitle = job.job_title;
+          result.company = job.employer_name;
+          applicationResults.push(result);
+        }
         
         // Save results to database
-        for (const result of botResults) {
-          if (result.status === 'applied') {
+        for (const result of applicationResults) {
+          try {
+            const existing = await Application.findOne({ seekerId, externalJobId: result.jobId });
+            if (existing) {
+              console.log(`Already applied to ${result.jobId}`);
+              continue;
+            }
+
             const application = new Application({
               seekerId,
               externalJobId: result.jobId,
-              jobUrl: result.jobUrl,
               jobTitle: result.jobTitle,
               company: result.company,
-              status: 'submitted',
+              status: result.status === 'success' ? 'submitted' : result.status === 'partial' ? 'pending' : 'failed',
               aiGenerated: true,
-              appliedAt: new Date()
+              appliedAt: result.submittedAt || new Date()
             });
             await application.save();
-            results.push({ jobId: result.jobId, success: true });
-          } else {
-            errors.push({ jobId: result.jobId, error: result.error });
+            
+            if (result.status === 'success' || result.status === 'partial') {
+              results.push({ jobId: result.jobId, success: true });
+            } else {
+              errors.push({ jobId: result.jobId, error: result.error });
+            }
+          } catch (err: any) {
+            console.error(`Save error for ${result.jobId}:`, err.message);
+            errors.push({ jobId: result.jobId, error: 'Failed to save' });
           }
         }
 
-        await productionAIBot.close();
+        // Send confirmation email
+        await aiApplicationService.sendConfirmationEmail(user.email, applicationResults);
         
-        // Send email notification
-        if (results.length > 0) {
-          const nodemailer = require('nodemailer');
-          const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASSWORD
-            }
-          });
-          
-          const jobsList = botResults.filter(r => r.status === 'applied').map(r => `- ${r.jobTitle} at ${r.company}`).join('\n');
-          
-          await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: `✅ AI Applied to ${results.length} Jobs Successfully!`,
-            html: `
-              <h2>Your AI Job Applications</h2>
-              <p>Great news! Our AI bot has successfully applied to ${results.length} jobs on your behalf.</p>
-              <h3>Jobs Applied:</h3>
-              <pre>${jobsList}</pre>
-              <p>You will receive confirmation emails from the companies directly.</p>
-              <p>Best of luck!</p>
-            `
-          }).catch((err: any) => console.error('Email error:', err));
-        }
+        await aiApplicationService.close();
+        
+
       } catch (botError: any) {
         console.error('AI Bot error:', botError);
         return res.status(500).json({ error: 'AI bot failed: ' + botError.message });

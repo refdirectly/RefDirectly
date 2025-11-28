@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchLinkedInJobs, fetchJobsJsearch } from '../services/linkedinScraper';
+import { fetchLinkedInJobs, fetchJobsJsearch, fetchJobsSearchAPI } from '../services/linkedinScraper';
 import Job from '../models/Job';
 
 export const scrapeAndSaveJobs = async (req: Request, res: Response) => {
@@ -53,14 +53,8 @@ export const fetchLiveJobs = async (req: Request, res: Response) => {
   try {
     const { keywords = 'software engineer', location = 'United States' } = req.query;
     
-    // Try LinkedIn API first, fallback to Jsearch
-    let jobs;
-    try {
-      jobs = await fetchLinkedInJobs(keywords as string, location as string);
-    } catch (linkedinError) {
-      console.log('LinkedIn API failed, trying Jsearch...');
-      jobs = await fetchJobsJsearch(keywords as string, location as string);
-    }
+    // Use Jsearch API (reliable)
+    const jobs = await fetchJobsJsearch(keywords as string, location as string);
     
     res.json({ 
       success: true, 

@@ -8,29 +8,75 @@ interface LinkedInJob {
   applyUrl: string;
 }
 
-// RapidAPI LinkedIn Scraper
+// RapidAPI LinkedIn Active Jobs API
 export const fetchLinkedInJobs = async (keywords: string, location: string = '', limit: number = 20) => {
   try {
     const options = {
       method: 'GET',
-      url: 'https://linkedin-data-api.p.rapidapi.com/search-jobs',
+      url: 'https://linkedin-job-search-api.p.rapidapi.com/active-jb-1h',
       params: {
-        keywords,
-        locationId: location || '92000000',
-        datePosted: 'anyTime',
-        sort: 'mostRelevant'
+        offset: '0',
+        description_type: 'text'
       },
       headers: {
-        'x-rapidapi-key': '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
-        'x-rapidapi-host': 'linkedin-data-api.p.rapidapi.com'
+        'x-rapidapi-key': process.env.RAPIDAPI_LINKEDIN_KEY || '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
+        'x-rapidapi-host': 'linkedin-job-search-api.p.rapidapi.com'
       }
     };
 
     const response = await axios.request(options);
-    return response.data;
-  } catch (error) {
-    console.error('LinkedIn API error:', error);
+    return response.data || [];
+  } catch (error: any) {
+    console.error('LinkedIn Active Jobs API error:', error.message);
     throw error;
+  }
+};
+
+// LinkedIn Active Jobs API
+export const fetchLinkedInActiveJobs = async (offset: number = 0) => {
+  try {
+    const options = {
+      method: 'GET',
+      url: 'https://linkedin-job-search-api.p.rapidapi.com/active-jb-1h',
+      params: {
+        offset: offset.toString(),
+        description_type: 'text'
+      },
+      headers: {
+        'x-rapidapi-key': '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
+        'x-rapidapi-host': 'linkedin-job-search-api.p.rapidapi.com'
+      }
+    };
+
+    const response = await axios.request(options);
+    return response.data || [];
+  } catch (error: any) {
+    console.error('LinkedIn Active Jobs API error:', error.message);
+    return [];
+  }
+};
+
+// Jobs Search API (RapidAPI)
+export const fetchJobsSearchAPI = async (query: string, location: string = 'United States', limit: number = 20) => {
+  try {
+    const options = {
+      method: 'GET',
+      url: 'https://jobs-search-api.p.rapidapi.com/getjobs',
+      params: {
+        query: `${query} in ${location}`,
+        limit: limit.toString()
+      },
+      headers: {
+        'x-rapidapi-key': process.env.RAPIDAPI_LINKEDIN_KEY || '7fa0f86964msh5e3200527f84e4cp1bde09jsn06eb6c8e7e3c',
+        'x-rapidapi-host': 'jobs-search-api.p.rapidapi.com'
+      }
+    };
+
+    const response = await axios.request(options);
+    return response.data || [];
+  } catch (error: any) {
+    console.error('Jobs Search API error:', error.message);
+    return [];
   }
 };
 

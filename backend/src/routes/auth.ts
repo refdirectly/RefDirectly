@@ -1,11 +1,13 @@
 import express from 'express';
-import { register, login, googleAuth, googleCallback, linkedinAuth, linkedinCallback } from '../controllers/authController';
+import { register, login, googleAuth, googleCallback, linkedinAuth, linkedinCallback, sendSignupOTP, verifySignupOTP } from '../controllers/authController';
 import passport from '../config/passport';
 import { authMiddleware } from '../utils/auth';
 import User from '../models/User';
 
 const router = express.Router();
 
+router.post('/send-otp', sendSignupOTP);
+router.post('/verify-otp', verifySignupOTP);
 router.post('/register', register);
 router.post('/login', login);
 router.get('/google', googleAuth);

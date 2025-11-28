@@ -5,7 +5,8 @@ import { authMiddleware, AuthRequest } from '../utils/auth';
 
 const router = express.Router();
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
+  apiKey: process.env.GROQ_API_KEY || '',
+  baseURL: 'https://api.groq.com/openai/v1'
 });
 
 // Find matching referrers using AI embeddings

@@ -1,5 +1,4 @@
-import { createNotification, emitNotification } from '../services/notificationService';
-import { io } from '../server';
+import { createNotification } from '../services/notificationService';
 
 export const sendNotification = async (
   userId: string,
@@ -10,9 +9,7 @@ export const sendNotification = async (
   priority: 'low' | 'medium' | 'high' = 'medium',
   metadata?: Record<string, any>
 ) => {
-  const notification = await createNotification(userId, type, title, message, link, priority, metadata);
-  emitNotification(io, userId, notification);
-  return notification;
+  return createNotification({ userId, type, title, message, link, priority, metadata });
 };
 
 // Deprecated - use roleBasedNotifications instead

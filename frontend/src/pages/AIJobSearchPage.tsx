@@ -24,6 +24,8 @@ const AIJobSearchPage: React.FC = () => {
   const [aiQuery, setAiQuery] = useState('');
   const [applyingJobs, setApplyingJobs] = useState<Set<string>>(new Set());
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
+  const [requestingReferrals, setRequestingReferrals] = useState<Set<string>>(new Set());
+  const [requestedReferrals, setRequestedReferrals] = useState<Set<string>>(new Set());
   const [botStatus, setBotStatus] = useState<string>('');
   const [aiSuggestions] = useState([
     'Senior Software Engineer with React experience',
@@ -153,6 +155,54 @@ const AIJobSearchPage: React.FC = () => {
       console.error('Failed to apply:', error);
     } finally {
       setApplyingJobs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(job.job_id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleRequestReferral = async (job: Job) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to request referrals');
+      return;
+    }
+
+    setRequestingReferrals(prev => new Set(prev).add(job.job_id));
+    
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/api-jobs/request-referral`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: job.job_title,
+          company: job.employer_name,
+          location: job.job_city && job.job_state ? `${job.job_city}, ${job.job_state}` : job.job_country,
+          description: job.job_description,
+          employerLogo: job.employer_logo,
+          employmentType: job.job_employment_type,
+          datePosted: job.job_posted_at_datetime_utc
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setRequestedReferrals(prev => new Set(prev).add(job.job_id));
+        alert(`✅ ${result.message}\n\nTokens Remaining: ${result.data.tokensRemaining}`);
+      } else {
+        alert(`❌ ${result.message}`);
+      }
+    } catch (error: any) {
+      console.error('Failed to request referral:', error);
+      alert('Failed to request referral. Please try again.');
+    } finally {
+      setRequestingReferrals(prev => {
         const newSet = new Set(prev);
         newSet.delete(job.job_id);
         return newSet;
@@ -421,8 +471,21 @@ const AIJobSearchPage: React.FC = () => {
                               'AI Apply Now'
                             )}
                           </button>
-                          <button className="border-2 border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:border-brand-purple hover:text-brand-purple transition-all duration-200">
-                            View Details
+                          <button
+                            onClick={() => handleRequestReferral(job)}
+                            disabled={requestingReferrals.has(job.job_id) || requestedReferrals.has(job.job_id)}
+                            className="border-2 border-brand-purple text-brand-purple px-6 py-2 rounded-lg font-semibold hover:bg-brand-purple hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {requestingReferrals.has(job.job_id) ? (
+                              <>
+                                <div className="h-4 w-4 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
+                                Requesting...
+                              </>
+                            ) : requestedReferrals.has(job.job_id) ? (
+                              '✓ Referral Requested'
+                            ) : (
+                              'Request Referral'
+                            )}
                           </button>
                         </div>
                       </div>

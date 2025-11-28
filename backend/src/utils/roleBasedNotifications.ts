@@ -1,5 +1,4 @@
-import { createNotification, emitNotification } from '../services/notificationService';
-import { io } from '../server';
+import { createNotification } from '../services/notificationService';
 
 // ==================== JOB SEEKER NOTIFICATIONS ====================
 
@@ -9,17 +8,15 @@ export const notifySeekerReferralAccepted = async (
   company: string,
   role: string
 ) => {
-  const notification = await createNotification(
-    seekerId,
-    'referral_accepted',
-    '🎉 Referral Accepted!',
-    `${referrerName} accepted your referral request for ${role} at ${company}`,
-    '/referrals',
-    'high',
-    { company, role, referrerName }
-  );
-  emitNotification(io, seekerId, notification);
-  return notification;
+  return createNotification({
+    userId: seekerId,
+    type: 'referral_accepted',
+    title: '🎉 Referral Accepted!',
+    message: `${referrerName} accepted your referral request for ${role} at ${company}`,
+    link: '/referrals',
+    priority: 'high',
+    metadata: { company, role, referrerName }
+  });
 };
 
 export const notifySeekerReferralRejected = async (
@@ -28,17 +25,15 @@ export const notifySeekerReferralRejected = async (
   company: string,
   role: string
 ) => {
-  const notification = await createNotification(
-    seekerId,
-    'referral_rejected',
-    'Referral Not Accepted',
-    `${referrerName} declined your referral request for ${role} at ${company}`,
-    '/find-referrer',
-    'medium',
-    { company, role, referrerName }
-  );
-  emitNotification(io, seekerId, notification);
-  return notification;
+  return createNotification({
+    userId: seekerId,
+    type: 'referral_rejected',
+    title: 'Referral Not Accepted',
+    message: `${referrerName} declined your referral request for ${role} at ${company}`,
+    link: '/find-referrer',
+    priority: 'medium',
+    metadata: { company, role, referrerName }
+  });
 };
 
 export const notifySeekerInterviewScheduled = async (
@@ -47,17 +42,15 @@ export const notifySeekerInterviewScheduled = async (
   role: string,
   interviewDate: string
 ) => {
-  const notification = await createNotification(
-    seekerId,
-    'interview_scheduled',
-    '📅 Interview Scheduled!',
-    `Your interview for ${role} at ${company} is scheduled for ${interviewDate}`,
-    '/applications',
-    'high',
-    { company, role, interviewDate }
-  );
-  emitNotification(io, seekerId, notification);
-  return notification;
+  return createNotification({
+    userId: seekerId,
+    type: 'interview_scheduled',
+    title: '📅 Interview Scheduled!',
+    message: `Your interview for ${role} at ${company} is scheduled for ${interviewDate}`,
+    link: '/applications',
+    priority: 'high',
+    metadata: { company, role, interviewDate }
+  });
 };
 
 export const notifySeekerApplicationUpdate = async (
@@ -66,17 +59,15 @@ export const notifySeekerApplicationUpdate = async (
   role: string,
   status: string
 ) => {
-  const notification = await createNotification(
-    seekerId,
-    'application_update',
-    'Application Update',
-    `Your application for ${role} at ${company} is now: ${status}`,
-    '/applications',
-    status === 'hired' ? 'high' : 'medium',
-    { company, role, status }
-  );
-  emitNotification(io, seekerId, notification);
-  return notification;
+  return createNotification({
+    userId: seekerId,
+    type: 'application_update',
+    title: 'Application Update',
+    message: `Your application for ${role} at ${company} is now: ${status}`,
+    link: '/applications',
+    priority: status === 'hired' ? 'high' : 'medium',
+    metadata: { company, role, status }
+  });
 };
 
 export const notifySeekerPaymentSent = async (
@@ -84,17 +75,15 @@ export const notifySeekerPaymentSent = async (
   amount: number,
   referrerName: string
 ) => {
-  const notification = await createNotification(
-    seekerId,
-    'payment_sent',
-    '💸 Payment Sent',
-    `Payment of $${amount} sent to ${referrerName} for successful referral`,
-    '/wallet',
-    'medium',
-    { amount, referrerName }
-  );
-  emitNotification(io, seekerId, notification);
-  return notification;
+  return createNotification({
+    userId: seekerId,
+    type: 'payment_sent',
+    title: '💸 Payment Sent',
+    message: `Payment of $${amount} sent to ${referrerName} for successful referral`,
+    link: '/wallet',
+    priority: 'medium',
+    metadata: { amount, referrerName }
+  });
 };
 
 export const notifySeekerNewMessage = async (
@@ -102,17 +91,15 @@ export const notifySeekerNewMessage = async (
   senderName: string,
   preview: string
 ) => {
-  const notification = await createNotification(
-    seekerId,
-    'message',
-    `💬 Message from ${senderName}`,
-    preview,
-    '/chat',
-    'medium',
-    { senderName }
-  );
-  emitNotification(io, seekerId, notification);
-  return notification;
+  return createNotification({
+    userId: seekerId,
+    type: 'message',
+    title: `💬 Message from ${senderName}`,
+    message: preview,
+    link: '/chat',
+    priority: 'medium',
+    metadata: { senderName }
+  });
 };
 
 // ==================== REFERRER NOTIFICATIONS ====================
@@ -124,17 +111,15 @@ export const notifyReferrerNewRequest = async (
   role: string,
   reward: number
 ) => {
-  const notification = await createNotification(
-    referrerId,
-    'referral_request',
-    '🤝 New Referral Request',
-    `${seekerName} requested a referral for ${role} at ${company} - Reward: $${reward}`,
-    '/referrals',
-    'high',
-    { seekerName, company, role, reward }
-  );
-  emitNotification(io, referrerId, notification);
-  return notification;
+  return createNotification({
+    userId: referrerId,
+    type: 'referral_request',
+    title: '🤝 New Referral Request',
+    message: `${seekerName} requested a referral for ${role} at ${company} - Reward: $${reward}`,
+    link: '/referrals',
+    priority: 'high',
+    metadata: { seekerName, company, role, reward }
+  });
 };
 
 export const notifyReferrerPaymentReceived = async (
@@ -143,17 +128,15 @@ export const notifyReferrerPaymentReceived = async (
   seekerName: string,
   company: string
 ) => {
-  const notification = await createNotification(
-    referrerId,
-    'payment_received',
-    '💰 Payment Received!',
-    `You received $${amount} for referring ${seekerName} to ${company}`,
-    '/wallet',
-    'high',
-    { amount, seekerName, company }
-  );
-  emitNotification(io, referrerId, notification);
-  return notification;
+  return createNotification({
+    userId: referrerId,
+    type: 'payment_received',
+    title: '💰 Payment Received!',
+    message: `You received $${amount} for referring ${seekerName} to ${company}`,
+    link: '/wallet',
+    priority: 'high',
+    metadata: { amount, seekerName, company }
+  });
 };
 
 export const notifyReferrerApplicationProgress = async (
@@ -162,17 +145,15 @@ export const notifyReferrerApplicationProgress = async (
   company: string,
   status: string
 ) => {
-  const notification = await createNotification(
-    referrerId,
-    'application_update',
-    '📊 Referral Progress Update',
-    `${seekerName}'s application at ${company} is now: ${status}`,
-    '/referrals',
-    status === 'hired' ? 'high' : 'medium',
-    { seekerName, company, status }
-  );
-  emitNotification(io, referrerId, notification);
-  return notification;
+  return createNotification({
+    userId: referrerId,
+    type: 'application_update',
+    title: '📊 Referral Progress Update',
+    message: `${seekerName}'s application at ${company} is now: ${status}`,
+    link: '/referrals',
+    priority: status === 'hired' ? 'high' : 'medium',
+    metadata: { seekerName, company, status }
+  });
 };
 
 export const notifyReferrerNewMessage = async (
@@ -180,17 +161,15 @@ export const notifyReferrerNewMessage = async (
   senderName: string,
   preview: string
 ) => {
-  const notification = await createNotification(
-    referrerId,
-    'message',
-    `💬 Message from ${senderName}`,
-    preview,
-    '/chat',
-    'medium',
-    { senderName }
-  );
-  emitNotification(io, referrerId, notification);
-  return notification;
+  return createNotification({
+    userId: referrerId,
+    type: 'message',
+    title: `💬 Message from ${senderName}`,
+    message: preview,
+    link: '/chat',
+    priority: 'medium',
+    metadata: { senderName }
+  });
 };
 
 export const notifyReferrerRatingReceived = async (
@@ -198,17 +177,15 @@ export const notifyReferrerRatingReceived = async (
   seekerName: string,
   rating: number
 ) => {
-  const notification = await createNotification(
-    referrerId,
-    'system',
-    '⭐ New Rating',
-    `${seekerName} rated you ${rating}/5 stars`,
-    '/profile',
-    'low',
-    { seekerName, rating }
-  );
-  emitNotification(io, referrerId, notification);
-  return notification;
+  return createNotification({
+    userId: referrerId,
+    type: 'system',
+    title: '⭐ New Rating',
+    message: `${seekerName} rated you ${rating}/5 stars`,
+    link: '/profile',
+    priority: 'low',
+    metadata: { seekerName, rating }
+  });
 };
 
 // ==================== COMMON NOTIFICATIONS ====================
@@ -219,14 +196,12 @@ export const notifySystemAnnouncement = async (
   message: string,
   link?: string
 ) => {
-  const notification = await createNotification(
+  return createNotification({
     userId,
-    'system',
+    type: 'system',
     title,
     message,
     link,
-    'medium'
-  );
-  emitNotification(io, userId, notification);
-  return notification;
+    priority: 'medium'
+  });
 };

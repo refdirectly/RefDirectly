@@ -12,15 +12,59 @@ interface Testimonial {
   metric: string;
 }
 
+const indianTestimonials: Testimonial[] = [
+  {
+    id: '1',
+    name: 'Priya Sharma',
+    company: 'Infosys',
+    avatar: 'https://ui-avatars.com/api/?name=Priya+Sharma&background=6366f1&color=fff',
+    quote: '"RefDirectly helped me land my dream job at Google. The referral process was seamless and professional. Highly recommend!"',
+    metric: 'Got referred to Google'
+  },
+  {
+    id: '2',
+    name: 'Rahul Verma',
+    company: 'TCS',
+    avatar: 'https://ui-avatars.com/api/?name=Rahul+Verma&background=8b5cf6&color=fff',
+    quote: '"As a referrer, I earned ₹25,000 in just 2 months. The platform is secure and payments are always on time."',
+    metric: 'Earned ₹25K in referrals'
+  },
+  {
+    id: '3',
+    name: 'Ananya Patel',
+    company: 'Wipro',
+    avatar: 'https://ui-avatars.com/api/?name=Ananya+Patel&background=ec4899&color=fff',
+    quote: '"Got referred to Amazon within 48 hours of posting my request. The AI-powered matching is incredibly efficient!"',
+    metric: 'Got referred to Amazon'
+  },
+  {
+    id: '4',
+    name: 'Arjun Singh',
+    company: 'HCL Technologies',
+    avatar: 'https://ui-avatars.com/api/?name=Arjun+Singh&background=14b8a6&color=fff',
+    quote: '"Professional platform with verified referrers. Successfully got interviews at 3 top companies through RefDirectly."',
+    metric: 'Got referred to Microsoft'
+  },
+  {
+    id: '5',
+    name: 'Sneha Reddy',
+    company: 'Tech Mahindra',
+    avatar: 'https://ui-avatars.com/api/?name=Sneha+Reddy&background=f59e0b&color=fff',
+    quote: '"The escrow system gives complete peace of mind. Payment is only released after referral confirmation. Brilliant!"',
+    metric: 'Got referred to Flipkart'
+  },
+  {
+    id: '6',
+    name: 'Vikram Malhotra',
+    company: 'Cognizant',
+    avatar: 'https://ui-avatars.com/api/?name=Vikram+Malhotra&background=3b82f6&color=fff',
+    quote: '"Best referral platform in India. Real-time notifications and professional communication throughout the process."',
+    metric: 'Got referred to Accenture'
+  }
+];
+
 const generateMockTestimonials = (count: number): Testimonial[] => {
-  return Array.from({ length: count }, () => ({
-    id: faker.string.uuid(),
-    name: faker.person.fullName(),
-    company: faker.company.name(),
-    avatar: faker.image.avatar(),
-    quote: `"${faker.lorem.paragraph({ min: 2, max: 4 })}"`,
-    metric: `Got referred to ${faker.company.name()}`,
-  }));
+  return indianTestimonials.slice(0, count);
 };
 
 const Testimonials: React.FC = () => {

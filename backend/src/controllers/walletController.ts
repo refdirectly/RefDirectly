@@ -132,18 +132,20 @@ export const releasePayment = async (req: Request, res: Response) => {
   }
 };
 
-export const refundPayment = async (req: Request, res: Response) => {
+export const refundPayment = async (req: Request, res?: Response) => {
   try {
     const { referralId } = req.body;
     
     const referral = await Referral.findById(referralId);
     if (!referral) {
-      return res.status(404).json({ success: false, message: 'Referral not found' });
+      if (res) return res.status(404).json({ success: false, message: 'Referral not found' });
+      return;
     }
     
     const wallet = await Wallet.findOne({ userId: referral.seekerId, userType: 'seeker' });
     if (!wallet || wallet.heldBalance < REFERRAL_FEE) {
-      return res.status(400).json({ success: false, message: 'No held payment found' });
+      if (res) return res.status(400).json({ success: false, message: 'No held payment found' });
+      return;
     }
     
     wallet.heldBalance -= REFERRAL_FEE;
@@ -165,9 +167,10 @@ export const refundPayment = async (req: Request, res: Response) => {
     referral.paymentStatus = 'refunded';
     await referral.save();
     
-    res.json({ success: true, wallet });
+    if (res) res.json({ success: true, wallet });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    if (res) res.status(500).json({ success: false, message: error.message });
+    throw error;
   }
 };
 
@@ -257,7 +260,7 @@ export const checkExpiredReferrals = async () => {
     });
     
     for (const referral of expiredReferrals) {
-      await refundPayment({ body: { referralId: referral._id } } as Request, {} as Response);
+      await refundPayment({ body: { referralId: referral._id } } as Request);
     }
     
     console.log(`Processed ${expiredReferrals.length} expired referrals`);

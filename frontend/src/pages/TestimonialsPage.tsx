@@ -16,15 +16,30 @@ interface Testimonial {
   metric: string;
 }
 
+const indianNames = [
+  { name: 'Priya Sharma', role: 'Senior Software Engineer', company: 'Tech Mahindra', quote: 'RefDirectly helped me land my dream job at Google! The referral process was smooth and the referrer was very supportive throughout.', metric: 'Got referred to Google', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' },
+  { name: 'Rahul Verma', role: 'Product Manager', company: 'Infosys', quote: 'I was struggling to get interviews at top companies. Through RefDirectly, I connected with an Amazon employee who referred me, and I got the job!', metric: 'Got referred to Amazon', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' },
+  { name: 'Ananya Reddy', role: 'Data Scientist', company: 'Wipro', quote: 'The platform is amazing! I got referred to Microsoft within a week of posting my request. Highly recommend to all job seekers.', metric: 'Got referred to Microsoft', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop' },
+  { name: 'Arjun Patel', role: 'Full Stack Developer', company: 'TCS', quote: 'Best investment I made in my career. The referrer not only submitted my resume but also gave me interview tips. Got the offer!', metric: 'Got referred to Meta', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop' },
+  { name: 'Sneha Iyer', role: 'UX Designer', company: 'HCL Technologies', quote: 'RefDirectly made the impossible possible. I got a referral to Apple and cleared all rounds. Forever grateful!', metric: 'Got referred to Apple', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
+  { name: 'Vikram Singh', role: 'DevOps Engineer', company: 'Cognizant', quote: 'The real-time matching feature is brilliant. Within hours of my request, I had multiple referrers reaching out. Landed at Netflix!', metric: 'Got referred to Netflix', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' },
+  { name: 'Kavya Nair', role: 'Business Analyst', company: 'Accenture', quote: 'I was skeptical at first, but RefDirectly exceeded my expectations. The referrer was professional and the process was transparent.', metric: 'Got referred to Goldman Sachs', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop' },
+  { name: 'Aditya Kumar', role: 'Machine Learning Engineer', company: 'Capgemini', quote: 'Got my dream job at Tesla through RefDirectly! The platform connects you with genuine employees who actually care about helping.', metric: 'Got referred to Tesla', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop' },
+  { name: 'Meera Desai', role: 'Frontend Developer', company: 'Mindtree', quote: 'The escrow payment system gave me confidence. Paid only after the referral was confirmed. Professional and trustworthy platform!', metric: 'Got referred to Adobe', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
+  { name: 'Rohan Gupta', role: 'Cloud Architect', company: 'LTI', quote: 'RefDirectly is a game-changer for job seekers. I got referred to AWS and the entire process was seamless. Thank you!', metric: 'Got referred to AWS', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop' },
+  { name: 'Divya Menon', role: 'QA Engineer', company: 'Mphasis', quote: 'I tried multiple platforms but RefDirectly is the only one that actually works. Got referred to Salesforce within 3 days!', metric: 'Got referred to Salesforce', avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop' },
+  { name: 'Karthik Rao', role: 'Backend Developer', company: 'Tech Mahindra', quote: 'The anonymous chat feature is great for discussing details before committing. Got referred to LinkedIn and received an offer!', metric: 'Got referred to LinkedIn', avatar: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=150&h=150&fit=crop' },
+];
+
 const generateMockTestimonials = (count: number): Testimonial[] => {
-  return Array.from({ length: count }, () => ({
-    id: faker.string.uuid(),
-    name: faker.person.fullName(),
-    company: faker.company.name(),
-    role: faker.person.jobTitle(),
-    avatar: faker.image.avatar(),
-    quote: faker.lorem.paragraph({ min: 3, max: 5 }),
-    metric: `Got referred to ${faker.company.name()}`,
+  return indianNames.slice(0, count).map((person, index) => ({
+    id: `testimonial-${index}`,
+    name: person.name,
+    company: person.company,
+    role: person.role,
+    avatar: person.avatar,
+    quote: person.quote,
+    metric: person.metric,
   }));
 };
 

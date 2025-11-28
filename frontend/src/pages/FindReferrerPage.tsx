@@ -9,27 +9,27 @@ const steps = [
   {
     icon: Search,
     title: 'Search Company & Role',
-    description: 'Enter the company name and job role you\'re interested in. We fetch live job openings from LinkedIn.',
+    description: 'Enter your target company and desired position. Our system validates against live job openings.',
   },
   {
     icon: Users,
-    title: 'Find Verified Referrers',
-    description: 'We identify registered referrers who work at that company and are available to help.',
+    title: 'Smart Matching Algorithm',
+    description: 'AI-powered matching connects you with verified employees based on role relevance and success rate.',
   },
   {
     icon: MessageSquare,
-    title: 'Real-Time Matching',
-    description: 'Your request is broadcast via Socket.io to all online referrers. First to accept gets connected.',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Anonymous Chat',
-    description: 'Connect in a secure chat room to share your resume and discuss the referral details.',
+    title: 'Instant Connection',
+    description: 'Real-time notification system alerts available referrers. First responder gets matched automatically.',
   },
   {
     icon: Shield,
-    title: 'Secure Payment',
-    description: 'Payment is held in escrow until the referrer confirms submission. You\'re protected.',
+    title: 'Secure Communication',
+    description: 'End-to-end encrypted chat ensures privacy. Share documents and discuss details confidentially.',
+  },
+  {
+    icon: Shield,
+    title: 'Escrow Protection',
+    description: 'Payment held securely until referral submission confirmed. Full transparency and buyer protection.',
   },
 ];
 
@@ -58,10 +58,10 @@ const FindReferrerPage: React.FC = () => {
               className="text-center max-w-3xl mx-auto mb-12"
             >
               <h1 className="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Find Your <span className="bg-gradient-primary bg-clip-text text-transparent">Referrer</span>
+                Professional <span className="bg-gradient-primary bg-clip-text text-transparent">Referral Network</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-600">
-                Connect with verified employees at your dream company and get referred instantly.
+                Connect with verified industry professionals through our secure, AI-powered matching platform.
               </p>
             </motion.div>
 
@@ -117,7 +117,7 @@ const FindReferrerPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-              <p className="text-lg text-gray-600">Get matched with referrers in real-time</p>
+              <p className="text-lg text-gray-600">Enterprise-grade matching with real-time connectivity</p>
             </div>
             <div className="max-w-4xl mx-auto space-y-8">
               {steps.map((step, index) => (
@@ -157,10 +157,10 @@ const FindReferrerPage: React.FC = () => {
               >
                 <Shield className="h-16 w-16 mx-auto mb-6" />
                 <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                  Protected by Escrow
+                  Enterprise-Grade Security
                 </h2>
                 <p className="text-lg mb-8 opacity-90">
-                  Your payment is held securely until the referral is confirmed. No risk, complete transparency.
+                  Bank-level encryption, escrow protection, and verified identity checks ensure complete transaction security.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Link to="/signup" className="bg-white text-brand-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
@@ -188,8 +188,8 @@ const FindReferrerPage: React.FC = () => {
                 className="bg-gray-50 p-6 rounded-xl shadow-subtle text-center"
               >
                 <Search className="h-10 w-10 text-brand-blue mx-auto mb-4" />
-                <h3 className="font-display text-lg font-semibold text-gray-900 mb-2">Live Job Openings</h3>
-                <p className="text-gray-600 text-sm">We fetch current job openings from LinkedIn using public APIs and scraping tools.</p>
+                <h3 className="font-display text-lg font-semibold text-gray-900 mb-2">Live Job Intelligence</h3>
+                <p className="text-gray-600 text-sm">Real-time job data aggregation from multiple sources ensures accurate opportunity matching.</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -199,8 +199,8 @@ const FindReferrerPage: React.FC = () => {
                 className="bg-gray-50 p-6 rounded-xl shadow-subtle text-center"
               >
                 <Users className="h-10 w-10 text-brand-blue mx-auto mb-4" />
-                <h3 className="font-display text-lg font-semibold text-gray-900 mb-2">Real-Time Broadcast</h3>
-                <p className="text-gray-600 text-sm">Your request is sent via Socket.io to all online referrers at the company instantly.</p>
+                <h3 className="font-display text-lg font-semibold text-gray-900 mb-2">Instant Matching</h3>
+                <p className="text-gray-600 text-sm">WebSocket-powered real-time notifications connect you with available professionals within seconds.</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -210,8 +210,8 @@ const FindReferrerPage: React.FC = () => {
                 className="bg-gray-50 p-6 rounded-xl shadow-subtle text-center"
               >
                 <MessageSquare className="h-10 w-10 text-brand-blue mx-auto mb-4" />
-                <h3 className="font-display text-lg font-semibold text-gray-900 mb-2">First Come, First Served</h3>
-                <p className="text-gray-600 text-sm">First referrer to accept gets connected. Others are notified automatically.</p>
+                <h3 className="font-display text-lg font-semibold text-gray-900 mb-2">Smart Queue System</h3>
+                <p className="text-gray-600 text-sm">Priority-based matching ensures optimal pairing while maintaining fairness and efficiency.</p>
               </motion.div>
             </div>
           </div>

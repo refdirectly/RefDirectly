@@ -26,6 +26,10 @@ import chatRoutes from './routes/chat';
 import aiResumeRoutes from './routes/aiResume';
 import notificationRoutes from './routes/notifications';
 import atsRoutes from './routes/ats';
+import adminRoutes from './routes/admin';
+import passwordRoutes from './routes/password';
+import apiJobRoutes from './routes/apiJobs';
+import subscriptionRoutes from './routes/subscription';
 
 dotenv.config();
 
@@ -34,8 +38,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: process.env.FRONTEND_URL || 'https://refdirectlywebsite.onrender.com',
+    methods: ['GET', 'POST'],
+    credentials: true
   },
   transports: ['websocket', 'polling']
 });
@@ -45,10 +50,19 @@ app.disable('x-powered-by');
 
 // Add explicit headers for Safari/Brave/Mobile compatibility
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'https://refdirectlywebsite.onrender.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ];
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'false');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.header('X-Content-Type-Options', 'nosniff');
   res.header('X-Frame-Options', 'SAMEORIGIN');
   if (req.method === 'OPTIONS') {
@@ -98,6 +112,10 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/ai-resume', aiResumeRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai-resume', atsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/password', passwordRoutes);
+app.use('/api/api-jobs', apiJobRoutes);
+app.use('/api/subscription', subscriptionRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

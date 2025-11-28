@@ -1,9 +1,11 @@
 import { Response } from 'express';
 import Referral from '../models/Referral';
 import Job from '../models/Job';
+import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { createEscrow } from '../services/escrowService';
 import ReferralRequest from '../models/ReferralRequest';
+import { notifyNewReferralRequest, notifyReferralAccepted, notifyReferralRejected, notifyReferralCompleted } from '../services/notificationService';
 
 export const createReferral = async (req: AuthRequest, res: Response) => {
   try {
@@ -24,6 +26,18 @@ export const createReferral = async (req: AuthRequest, res: Response) => {
     });
 
     await referral.save();
+
+    // Notify referrer about new request
+    if (referrerId) {
+      const seeker = await User.findById(seekerId);
+      await notifyNewReferralRequest(
+        referrerId,
+        seeker?.name || 'A job seeker',
+        company || 'Unknown Company',
+        role || 'Unknown Position',
+        referral._id.toString()
+      );
+    }
 
     res.status(201).json({ success: true, referral });
   } catch (error: any) {
@@ -184,8 +198,38 @@ export const updateReferralStatus = async (req: AuthRequest, res: Response) => {
       req.params.id,
       updateData,
       { new: true }
-    );
+    ).populate('seekerId referrerId');
+    
     if (!referral) return res.status(404).json({ error: 'Referral not found' });
+    
+    // Send notifications based on status
+    if (status === 'accepted' && referral.seekerId) {
+      const referrer = await User.findById(req.user?.userId);
+      await notifyReferralAccepted(
+        (referral.seekerId as any)._id.toString(),
+        referrer?.name || 'A referrer',
+        referral.company,
+        referral._id.toString()
+      );
+    } else if (status === 'rejected' && referral.seekerId) {
+      await notifyReferralRejected(
+        (referral.seekerId as any)._id.toString(),
+        referral.company,
+        referral.role
+      );
+    } else if (status === 'completed') {
+      // Notify referrer about completion and payment
+      if (referral.referrerId) {
+        const seeker = await User.findById(referral.seekerId);
+        await notifyReferralCompleted(
+          (referral.referrerId as any)._id.toString(),
+          seeker?.name || 'Job seeker',
+          5000,
+          referral._id.toString()
+        );
+      }
+    }
+    
     res.json(referral);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update referral' });

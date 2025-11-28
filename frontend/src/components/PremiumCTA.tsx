@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const features = [
   'Unlimited referral requests',
@@ -13,6 +13,12 @@ const features = [
 ];
 
 const PremiumCTA: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleGetPremium = () => {
+    navigate('/pricing#pricing-plans');
+  };
+
   return (
     <section className="pt-12 pb-20 bg-white">
       <div className="container mx-auto px-4">
@@ -64,18 +70,18 @@ const PremiumCTA: React.FC = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  to="/signup"
+                <button
+                  onClick={handleGetPremium}
                   className="bg-white text-brand-purple px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 shadow-xl"
                 >
                   Get Premium Now
-                </Link>
-                <Link
-                  to="/how-it-works"
+                </button>
+                <button
+                  onClick={handleGetPremium}
                   className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-all duration-200 hover:scale-105"
                 >
-                  Learn More
-                </Link>
+                  View Pricing
+                </button>
               </div>
             </div>
           </div>

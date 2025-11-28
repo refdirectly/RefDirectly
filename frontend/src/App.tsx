@@ -40,6 +40,12 @@ import ReferrerChatPage from './pages/ReferrerChatPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ATSChecker from './pages/ATSChecker';
 import ApplicationsPage from './pages/ApplicationsPage';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLoginPage from './pages/AdminLoginPage';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import PricingPage from './pages/PricingPage';
+import CheckoutPage from './pages/CheckoutPage';
 import Chatbot from './components/Chatbot';
 
 function LandingPage() {
@@ -69,6 +75,8 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/testimonials" element={<TestimonialsPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         
         {/* Auth Routes */}
         <Route path="/auth/login" element={<Login />} />
@@ -77,6 +85,8 @@ function App() {
         <Route path="/auth/referrer/login" element={<ReferrerLoginPage />} />
         <Route path="/auth/referrer/signup" element={<ReferrerSignupPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         
         {/* Job Seeker Routes */}
         <Route path="/jobs" element={<JobsPage />} />
@@ -105,6 +115,8 @@ function App() {
         <Route path="/referrer/wallet" element={<ReferrerWalletPage />} />
         
         {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/scraper" element={<AdminJobScraper />} />
         
         {/* Legacy Redirects */}

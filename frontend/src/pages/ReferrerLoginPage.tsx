@@ -178,9 +178,9 @@ const ReferrerLoginPage: React.FC = () => {
                       Remember me
                     </label>
                   </div>
-                  <a href="#" className="text-sm font-semibold text-brand-purple hover:text-brand-magenta transition-colors">
+                  <Link to="/forgot-password" className="text-sm font-semibold text-brand-purple hover:text-brand-magenta transition-colors">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
 
                 <button

@@ -2,10 +2,13 @@ import OpenAI from 'openai';
 import { fetchJobsJsearch } from './linkedinScraper';
 
 const getOpenAI = () => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured');
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ API key not configured');
   }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return new OpenAI({ 
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: 'https://api.groq.com/openai/v1'
+  });
 };
 
 export const aiJobSearch = async (userQuery: string) => {
@@ -13,7 +16,7 @@ export const aiJobSearch = async (userQuery: string) => {
     const openai = getOpenAI();
     // Use OpenAI to parse user's natural language query
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -69,7 +72,7 @@ const rankJobsWithAI = async (jobs: any[], userQuery: string, params: any) => {
     }));
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -97,7 +100,7 @@ export const generateJobRecommendations = async (userProfile: any) => {
   try {
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",

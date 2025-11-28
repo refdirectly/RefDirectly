@@ -12,8 +12,12 @@ const SignUp: React.FC = () => {
     password: '',
     confirmPassword: ''
   });
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const organizationDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com'];
@@ -23,9 +27,74 @@ const SignUp: React.FC = () => {
     return domain && !organizationDomains.includes(domain);
   };
 
+  const sendOTP = async () => {
+    setError('');
+    setSuccess('');
+    
+    if (!formData.email) {
+      setError('Please enter your email');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      setOtpSent(true);
+      setSuccess('OTP sent to your email!');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    setError('');
+    setSuccess('');
+    
+    if (!otp || otp.length !== 6) {
+      setError('Please enter 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      setOtpVerified(true);
+      setSuccess('Email verified! You can now complete signup.');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!otpVerified) {
+      setError('Please verify your email with OTP first');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -53,7 +122,8 @@ const SignUp: React.FC = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: userType || 'seeker'
+          role: userType || 'seeker',
+          otpVerified: true
         })
       });
 
@@ -95,7 +165,7 @@ const SignUp: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             <Link to="/auth/signup/seeker">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -160,6 +230,41 @@ const SignUp: React.FC = () => {
               </ul>
               <button className="w-full bg-gradient-to-r from-brand-teal to-brand-magenta text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200">
                 Sign Up as Referrer
+              </button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              onClick={() => navigate('/admin/login')}
+              className="bg-gradient-to-br from-gray-900 to-purple-900 rounded-2xl p-8 shadow-xl border-2 border-gray-700 hover:border-purple-500 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 mx-auto">
+                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="font-display text-2xl font-bold text-white mb-3 text-center">Admin</h3>
+              <p className="text-gray-300 text-center mb-6">
+                Manage platform operations and users
+              </p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-300">Full platform control</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-300">Analytics & insights</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-300">User management</span>
+                </li>
+              </ul>
+              <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200">
+                Admin Portal
               </button>
             </motion.div>
           </div>
@@ -230,18 +335,36 @@ const SignUp: React.FC = () => {
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  {userType === 'referrer' ? 'Organization Email' : 'Email Address'} {userType === 'referrer' && <span className="text-red-500">*</span>}
+                  {userType === 'referrer' ? 'Organization Email' : 'Email Address'} <span className="text-red-500">*</span>
                 </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all"
-                  placeholder={userType === 'referrer' ? 'john@company.com' : 'you@example.com'}
-                />
+                <div className="flex gap-2">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={otpVerified}
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all disabled:bg-gray-100"
+                    placeholder={userType === 'referrer' ? 'john@company.com' : 'you@example.com'}
+                  />
+                  {!otpVerified && (
+                    <button
+                      type="button"
+                      onClick={sendOTP}
+                      disabled={loading || !formData.email}
+                      className="px-6 py-3 bg-brand-purple text-white rounded-xl font-semibold hover:bg-brand-magenta transition-all disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {otpSent ? 'Resend' : 'Send OTP'}
+                    </button>
+                  )}
+                  {otpVerified && (
+                    <div className="flex items-center px-4 py-3 bg-green-100 rounded-xl">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                  )}
+                </div>
                 {userType === 'referrer' && (
                   <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
@@ -249,6 +372,39 @@ const SignUp: React.FC = () => {
                   </p>
                 )}
               </div>
+              {otpSent && !otpVerified && (
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Enter OTP <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="otp"
+                      type="text"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all text-center text-2xl tracking-widest font-bold"
+                      placeholder="000000"
+                    />
+                    <button
+                      type="button"
+                      onClick={verifyOTP}
+                      disabled={loading || otp.length !== 6}
+                      className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all disabled:opacity-50"
+                    >
+                      Verify
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1.5">Check your email for the 6-digit OTP</p>
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-green-800">{success}</p>
+                </div>
+              )}
               {userType === 'referrer' && (
                 <div>
                   <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">

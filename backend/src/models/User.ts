@@ -26,6 +26,8 @@ export interface IUser extends Document {
   lastSeenAt: Date;
   avatarUrl?: string;
   bio?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -77,7 +79,9 @@ const UserSchema = new Schema<IUser>({
     default: Date.now
   },
   avatarUrl: String,
-  bio: String
+  bio: String,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 
 export default mongoose.model<IUser>('User', UserSchema);

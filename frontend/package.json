@@ -8,12 +8,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "vite preview --port $PORT --host"
-
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
     "axios": "^1.6.0",
     "framer-motion": "^12.23.24",
+    "html2pdf.js": "^0.12.1",
     "lucide-react": "^0.553.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

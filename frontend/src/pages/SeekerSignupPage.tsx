@@ -10,17 +10,78 @@ const SeekerSignupPage: React.FC = () => {
     password: '',
     confirmPassword: ''
   });
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const sendOTP = async () => {
+    setError('');
+    setSuccess('');
+    if (!formData.email) {
+      setError('Please enter your email');
+      return;
+    }
+    setLoading(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setOtpSent(true);
+      setSuccess('OTP sent! Check your email.');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    setError('');
+    setSuccess('');
+    if (!otp || otp.length !== 6) {
+      setError('Enter 6-digit OTP');
+      return;
+    }
+    setLoading(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setOtpVerified(true);
+      setSuccess('✓ Email verified!');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!otpVerified) {
+      setError('Please verify your email with OTP first');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -35,14 +96,15 @@ const SeekerSignupPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/auth/register`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: 'seeker'
+          role: 'seeker',
+          otpVerified: true
         })
       });
 
@@ -152,19 +214,70 @@ const SeekerSignupPage: React.FC = () => {
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email Address
+                    Email Address <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all"
-                    placeholder="you@example.com"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={otpVerified}
+                      className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all disabled:bg-gray-100"
+                      placeholder="you@example.com"
+                    />
+                    {!otpVerified && (
+                      <button
+                        type="button"
+                        onClick={sendOTP}
+                        disabled={loading || !formData.email}
+                        className="px-6 py-3 bg-brand-purple text-white rounded-xl font-semibold hover:bg-brand-magenta transition-all disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {otpSent ? 'Resend' : 'Send OTP'}
+                      </button>
+                    )}
+                    {otpVerified && (
+                      <div className="flex items-center px-4 py-3 bg-green-100 rounded-xl">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {otpSent && !otpVerified && (
+                  <div>
+                    <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Enter OTP <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="otp"
+                        type="text"
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all text-center text-2xl tracking-widest font-bold"
+                        placeholder="000000"
+                      />
+                      <button
+                        type="button"
+                        onClick={verifyOTP}
+                        disabled={loading || otp.length !== 6}
+                        className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all disabled:opacity-50"
+                      >
+                        Verify
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1.5">Check your email for the 6-digit OTP</p>
+                  </div>
+                )}
+                {success && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-green-800">{success}</p>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">

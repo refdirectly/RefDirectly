@@ -11,8 +11,12 @@ const ReferrerSignupPage: React.FC = () => {
     password: '',
     confirmPassword: ''
   });
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const organizationDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com'];
@@ -26,12 +30,66 @@ const ReferrerSignupPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const sendOTP = async () => {
+    setError('');
+    setSuccess('');
+    if (!formData.email) {
+      setError('Please enter your email');
+      return;
+    }
+    if (!isOrganizationEmail(formData.email)) {
+      setError('Please use your organization email address (not Gmail, Yahoo, etc.)');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, role: 'referrer' })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setOtpSent(true);
+      setSuccess('OTP sent! Check your email.');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    setError('');
+    setSuccess('');
+    if (!otp || otp.length !== 6) {
+      setError('Enter 6-digit OTP');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setOtpVerified(true);
+      setSuccess('✓ Email verified!');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!isOrganizationEmail(formData.email)) {
-      setError('Please use your organization email address (not Gmail, Yahoo, etc.)');
+    if (!otpVerified) {
+      setError('Please verify your email with OTP first');
       return;
     }
 
@@ -48,14 +106,15 @@ const ReferrerSignupPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/auth/register`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: 'referrer'
+          role: 'referrer',
+          otpVerified: true
         })
       });
 
@@ -167,21 +226,66 @@ const ReferrerSignupPage: React.FC = () => {
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                     Organization Email <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all"
-                    placeholder="john@company.com"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={otpVerified}
+                      className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all disabled:bg-gray-100"
+                      placeholder="john@company.com"
+                    />
+                    {!otpVerified && (
+                      <button
+                        type="button"
+                        onClick={sendOTP}
+                        disabled={loading || !formData.email}
+                        className="px-6 py-3 bg-brand-purple text-white rounded-xl font-semibold hover:bg-brand-magenta transition-all disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {otpSent ? 'Resend' : 'Send OTP'}
+                      </button>
+                    )}
+                    {otpVerified && (
+                      <div className="flex items-center px-4 py-3 bg-green-100 rounded-xl">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     Must be a company email (not Gmail, Yahoo, etc.)
                   </p>
                 </div>
+                {otpSent && !otpVerified && (
+                  <div>
+                    <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Enter OTP <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="otp"
+                        type="text"
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all text-center text-2xl tracking-widest font-bold"
+                        placeholder="000000"
+                      />
+                      <button
+                        type="button"
+                        onClick={verifyOTP}
+                        disabled={loading || otp.length !== 6}
+                        className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all disabled:opacity-50"
+                      >
+                        Verify
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1.5">Check your email for the 6-digit OTP</p>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -236,13 +340,24 @@ const ReferrerSignupPage: React.FC = () => {
                   <span>By signing up, you agree to verify your employment and follow our referral guidelines.</span>
                 </div>
 
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3"
+                  >
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-green-800">{success}</p>
+                  </motion.div>
+                )}
+
                 <button
                   type="submit"
                   disabled={loading}
                   className="w-full bg-gradient-primary text-white py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading && <Loader2 className="h-5 w-5 animate-spin" />}
-                  {loading ? 'Creating Account...' : 'Sign Up as Referrer'}
+                  {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
 
                 <p className="text-center text-sm text-gray-600 pt-4">

@@ -23,3 +23,14 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 };
 
 export const authenticateJWT = authMiddleware;
+
+export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    next();
+  } catch (error) {
+    res.status(403).json({ success: false, message: 'Access denied' });
+  }
+};
